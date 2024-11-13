@@ -9,6 +9,7 @@ setmetatable(PlayerStatus, {
 })
 
 local Status = require("class.Status")
+local DEBUG  = require("shared.config").debug
 
 ---@param name string
 ---@param value number
@@ -32,6 +33,48 @@ function PlayerStatus:registerStatus(name, value)
     return instance and true or false
 end
 
+---@param name string
+---@return boolean
+function PlayerStatus:unregisterStatus(name)
+    if not self.statuses[name] then
+        if DEBUG then
+            ESX.Trace("PlayerStatus:unregisterStatus error status does not exist!", "error", true)
+        end
+
+        return false
+    end
+
+    self.statuses[name] = nil
+    self.statebag:set(name, nil, true)
+
+    return true
+end
+
+function PlayerStatus:unregisterAllStatus()
+    for status in pairs(self.statuses) do
+        self:unregisterStatus(status)
+    end
+end
+
+---@param name string
+---@return Status?
+function PlayerStatus:getStatus(name)
+    if not self.statuses[name] then
+        if DEBUG then
+            ESX.Trace("PlayerStatus:getStatus error status does not exist!", "error", true)
+        end
+
+        return
+    end
+
+    return self.statuses[name]
+end
+
+---@return table<string, Status>
+function PlayerStatus:getAllStatus()
+    return self.statuses
+end
+
 ---@param playerId number
 ---@param restoredStatuses table<string, number>
 return function(playerId, restoredStatuses)
@@ -42,7 +85,7 @@ return function(playerId, restoredStatuses)
     }, PlayerStatus)
 
     for statusName, configData in pairs(GlobalState.statuses) do
-        self:registerStatus(statusName, restoredStatuses[statusName] or configData.value)
+        self:registerStatus(statusName, restoredStatuses?[statusName] or configData.value)
     end
 
     return self
