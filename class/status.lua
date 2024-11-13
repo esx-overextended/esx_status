@@ -1,29 +1,66 @@
+---@class Status
+---@field name string
+---@field value number
 local Status = {}
-Status.__index = Status
+setmetatable(Status, {
+    __index = Status,
+    __metatable = false
+})
 
 local utils = require("shared.utils")
 local DEBUG = require("shared.config").debug
 
----@param amount number
-function Status:setAmount(amount)
-    if not type(amount) == "number" then
+---@return string
+function Status:getName()
+    return self.name
+end
+
+---@return number
+function Status:getValue()
+    return self.value
+end
+
+---@param value number
+---@return boolean
+function Status:setValue(value)
+    if type(value) ~= "number" then
         if DEBUG then
-            ESX.Trace("Status:setAmount(amount) error type!", "error", true)
+            ESX.Trace("Status:setValue error type!", "error", true)
         end
 
         return false
     end
 
-    self.amount = amount
+    if not utils.isValueValid(value) then
+        if DEBUG then
+            ESX.Trace("Status:setValue error isValueValid!", "error", true)
+        end
+
+        return false
+    end
+
+    self.value = value
 
     return true
 end
 
----@param name string
 ---@param amount number
-return function(name, amount)
+---@return boolean
+function Status:increaseValue(amount)
+    return self:setValue(self.amount + amount)
+end
+
+---@param amount number
+---@return boolean
+function Status:decreaseValue(amount)
+    return self:setValue(self.amount - amount)
+end
+
+---@param name string
+---@param value number
+return function(name, value)
     return setmetatable({
         name = name,
-        amount = amount
+        value = value
     }, Status)
 end

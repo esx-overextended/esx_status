@@ -1,13 +1,9 @@
 local utils = {}
 
-function utils.isAmountValid(amount)
-    local isValid = false
-
-    if type(amount) == "number" then
-        isValid = amount <= 100 or amount >= 0
-    end
-
-    return isValid
+---@param amount number
+---@return boolean
+function utils.isValueValid(amount)
+    return type(amount) == "number" and (amount >= 0 and amount <= 100)
 end
 
 return utils

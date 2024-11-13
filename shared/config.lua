@@ -1,4 +1,4 @@
 return {
-    debug = false
+    debug = false,
     status = {}
 }

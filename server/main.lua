@@ -1,4 +1,4 @@
-local config = require("shared/config")
+local config = require("shared.config")
 GlobalState:set("status", config.status, true)
 
 ---@param resource string
