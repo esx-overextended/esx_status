@@ -1,6 +1,7 @@
 ---@class PlayerStatus
----@field playerId string
+---@field playerId number
 ---@field statuses table<string, Status>
+---@field statebag { set: fun(self, bagName: string, value: any, replicated?: boolean) }
 local PlayerStatus = {}
 setmetatable(PlayerStatus, {
     __index = PlayerStatus,
@@ -21,17 +22,23 @@ function PlayerStatus:registerStatus(name, value)
         return false
     end
 
-    self.statuses[name] = Status(name, value)
+    local instance = Status(name, value)
 
-    return self.statuses[name] and true
+    if instance then
+        self.statuses[name] = instance
+        self.statebag:set(name, value, true)
+    end
+
+    return instance and true or false
 end
 
 ---@param playerId number
 ---@param restoredStatuses table<string, number>
 return function(playerId, restoredStatuses)
     local self = setmetatable({
+        statuses = {},
         playerId = playerId,
-        statuses = {}
+        statebag = Entity(playerId).state
     }, PlayerStatus)
 
     for statusName, configData in pairs(GlobalState.statuses) do
