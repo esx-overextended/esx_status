@@ -1,4 +1,8 @@
 return {
     debug = false,
-    status = {}
+    statuses = {
+        hunger = {
+            value = 50
+        }
+    }
 }

@@ -58,7 +58,12 @@ end
 
 ---@param name string
 ---@param value number
+---@return Status?
 return function(name, value)
+    if type(name) ~= "string" or type(value) ~= "number" then
+        return ESX.Trace("Invalid parameters passed while creating an instance of Status class!", "error", true)
+    end
+
     return setmetatable({
         name = name,
         value = value

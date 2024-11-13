@@ -1,10 +1,10 @@
 local config = require("shared.config")
-GlobalState:set("status", config.status, true)
+GlobalState:set("statuses", config.statuses, true)
 
 ---@param resource string
 local function onResourceStop(resource)
     if resource == cache.resource then
-        GlobalState:set("status", nil, true)
+        GlobalState:set("statuses", nil, true)
     end
 end
 
