@@ -13,6 +13,7 @@ dependencies {
 
 shared_scripts {
     "@es_extended/imports.lua",
+    "@ox_lib/init.lua",
     "shared/*.lua",
 }
 

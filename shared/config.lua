@@ -1,5 +1,4 @@
-Config = {}
-
-Config.Status = {
-    
+return {
+    debug = false
+    status = {}
 }
