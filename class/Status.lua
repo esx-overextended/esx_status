@@ -52,11 +52,11 @@ return function(name, value)
     local typeValue = type(value)
 
     if typeName ~= "string" then
-        return ESX.Trace(("Invalid nam passed while creating an instance of Status class! Received '%s', expected 'number'"):format(typeName), "error", true)
+        return ESX.Trace(("Invalid nam passed while creating an instance of Status class! Received '%s', expected 'string'"):format(typeName), "error", true)
     end
 
     if typeValue ~= "number" then
-        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Received '%s', expected 'string'"):format(typeValue), "error", true)
+        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Received '%s', expected 'number'"):format(typeValue), "error", true)
     end
 
     return setmetatable({

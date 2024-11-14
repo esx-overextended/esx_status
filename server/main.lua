@@ -53,6 +53,10 @@ AddEventHandler("esx:playerDropped", onPlayerDropped)
 local function onResourceStop(resource)
     if resource == cache.resource then
         GlobalState:set("statuses", nil, true)
+
+        if DEBUG then
+            ESX.Trace("Cleared GlobalState['statuses'] on resource stop", "trace", true)
+        end
     end
 end
 
