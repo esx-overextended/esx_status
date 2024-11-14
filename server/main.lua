@@ -35,6 +35,98 @@ end
 AddEventHandler("esx:playerLoaded", onPlayerLoaded)
 AddEventHandler("esx:playerDropped", onPlayerDropped)
 
+---@param resource string
+local function onResourceStop(resource)
+    if resource == cache.resource then
+        GlobalState:set("statuses", nil, true)
+    end
+end
+
+AddEventHandler("onResourceStop", onResourceStop)
+AddEventHandler("onServerResourceStop", onResourceStop)
+
+---Setup the status system for players that are already logged in (in case of resource restart)
+do
+    CreateThread(function()
+        GlobalState:set("statuses", config.statuses, true)
+    end)
+
+    Wait(1000) -- wait for global statebag to initializes
+
+    local xPlayers, count = ESX.GetExtendedPlayers()
+
+    for i = 1, count, 1 do
+        local xPlayer = xPlayers[i]
+
+        onPlayerLoaded(xPlayer.playerId, xPlayer)
+    end
+end
+
+-----------------------------------------
+-----------------EXPORTS-----------------
+-----------------------------------------
+
+---Generates an export to register a status in the system
+---@param statusName string
+---@param statusData table<string, any>
+---@return boolean?
+function utils.api.registerGlobalStatus(statusName, statusData)
+    local registeredStatuses = GlobalState["statuses"]
+
+    if registeredStatuses[statusName] then
+        ESX.Trace(("exports:registerGlobalStatus(%s) error status already exist!"):format(statusName), "error", true)
+
+        return false
+    end
+
+    if type(statusName) ~= "string" or type(statusData) ~= "table" or type(statusData?.value) ~= "number" then
+        ESX.Trace(("exports:registerGlobalStatus(%s) error type!"):format(statusName), "error", true)
+
+        return false
+    end
+
+    registeredStatuses[statusName] = statusData
+    GlobalState:set("statuses", registeredStatuses)
+
+    --Register the new status for already logged in players
+    for _, playerData in pairs(tracker:getAllPlayers()) do
+        playerData:registerStatus(statusName, statusData.value)
+    end
+
+    if DEBUG then
+        ESX.Trace(("exports:registerGlobalStatus(%s) was successful!"):format(statusName), "trace", true)
+    end
+
+    return true
+end
+
+---Generates an export to unregister a status from the system
+---@param statusName string
+---@return boolean?
+function utils.api.unregisterGlobalStatus(statusName)
+    local registeredStatuses = GlobalState["statuses"]
+
+    if not registeredStatuses[statusName] then
+        ESX.Trace(("exports:unregisterGlobalStatus(%s) error status does not exist!"):format(statusName), "error", true)
+
+        return false
+    end
+
+    registeredStatuses[statusName] = nil
+    GlobalState:set("statuses", registeredStatuses)
+
+    --Unregister the status from already logged in players
+    for _, playerData in pairs(tracker:getAllPlayers()) do
+        playerData:unregisterStatus(statusName)
+    end
+
+    if DEBUG then
+        ESX.Trace(("exports:unregisterGlobalStatus(%s) was successful!"):format(statusName), "trace", true)
+    end
+
+    return true
+end
+
 ---Generates an export to retrieve the specified player's status value
 ---@param playerId number
 ---@param status string
@@ -91,29 +183,6 @@ function utils.api.decreasePlayerStatus(playerId, status, amount)
     return currentAmount and player:setStatus(status, currentAmount - amount)
 end
 
----@param resource string
-local function onResourceStop(resource)
-    if resource == cache.resource then
-        GlobalState:set("statuses", nil, true)
-    end
-end
-
-AddEventHandler("onResourceStop", onResourceStop)
-AddEventHandler("onServerResourceStop", onResourceStop)
-
----Setup the status system for players that are already logged in (in case of resource restart)
-do
-    CreateThread(function()
-        GlobalState:set("statuses", config.statuses, true)
-    end)
-
-    Wait(1000) -- wait for global statebag to initializes
-
-    local xPlayers, count = ESX.GetExtendedPlayers()
-
-    for i = 1, count, 1 do
-        local xPlayer = xPlayers[i]
-
-        onPlayerLoaded(xPlayer.playerId, xPlayer)
-    end
-end
+-----------------------------------------
+-----------------EXPORTS-----------------
+-----------------------------------------

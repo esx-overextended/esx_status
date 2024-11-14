@@ -88,6 +88,11 @@ function PlayerStatusRegistry:getPlayer(playerId)
     return self.registry[playerId]
 end
 
+---@return table<string, PlayerStatus>
+function PlayerStatusRegistry:getAllPlayers()
+    return self.registry
+end
+
 ---@return PlayerStatusRegistry
 return function()
     return setmetatable({

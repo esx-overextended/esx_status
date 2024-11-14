@@ -1,7 +1,7 @@
 ---@class PlayerStatus
 ---@field playerId number
 ---@field statuses table<string, Status>
----@field statebag { set: fun(self, bagName: string, value: any, replicated?: boolean) }
+---@field statebag { set: fun(self: any, bagName: string, value: any, replicated?: boolean), [string]: any }
 local PlayerStatus = {}
 PlayerStatus.__index = PlayerStatus
 
