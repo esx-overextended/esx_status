@@ -45,6 +45,15 @@ function utils.api.getPlayerStatus(playerId, status)
     return player and player:getStatus(status)
 end
 
+---Generates an export to retrieve all of the specified player's status values
+---@param playerId number
+---@return table<string, number>?
+function utils.api.getAllPlayerStatus(playerId)
+    local player = tracker:getPlayer(playerId)
+
+    return player and player:getAllStatus()
+end
+
 ---Generates an export to set the specified player's status value
 ---@param playerId number
 ---@param status string
@@ -63,8 +72,10 @@ end
 ---@return boolean?
 function utils.api.increasePlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
+    local currentAmount = player and player:getStatus(status)
 
-    return player and player:setStatus(status, player:getStatus(status) + amount)
+    ---@diagnostic disable-next-line: need-check-nil
+    return currentAmount and player:setStatus(status, currentAmount + amount)
 end
 
 ---Generates an export to decrease the specified player's status value
@@ -74,9 +85,10 @@ end
 ---@return boolean?
 function utils.api.decreasePlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
-    local playerStatus = player and player:getStatus(status)
+    local currentAmount = player and player:getStatus(status)
 
-    return player and player:setStatus(status, player:getStatus(status) - amount)
+    ---@diagnostic disable-next-line: need-check-nil
+    return currentAmount and player:setStatus(status, currentAmount - amount)
 end
 
 ---@param resource string
