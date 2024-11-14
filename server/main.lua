@@ -1,3 +1,17 @@
+-----------------------------------------
+----------------UNIT TESTS---------------
+-----------------------------------------
+
+--Run unit tests upon starting the resource
+if not require("test.units") then
+    ESX.Trace(("Resource ^1%s^7 halted due to failed tests!"):format(cache.resource), "error", true)
+
+    return StopResource(cache.resource)
+end
+-----------------------------------------
+----------------UNIT TESTS---------------
+-----------------------------------------
+
 local utils   = require("shared.utils")
 local config  = require("shared.config")
 local tracker = require("class.PlayerStatusRegistry")()

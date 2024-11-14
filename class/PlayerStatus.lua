@@ -133,7 +133,7 @@ return function(playerId, restoredStatuses)
         statebag = Player(playerId).state
     }, PlayerStatus)
 
-    for statusName, configData in pairs(GlobalState.statuses) do
+    for statusName, configData in pairs(GlobalState.statuses or {}) do
         self:registerStatus(statusName, restoredStatuses?[statusName] or configData.value)
     end
 
