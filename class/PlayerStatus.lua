@@ -63,22 +63,53 @@ function PlayerStatus:unregisterAllStatus()
 end
 
 ---@param name string
----@return Status?
+---@return number?
 function PlayerStatus:getStatus(name)
-    if not self.statuses[name] then
+    local status = self.statuses[name]
+
+    if not status then
         if DEBUG then
-            ESX.Trace(("PlayerStatus:getStatus(%s) error registry does not exist!"):format(self.playerId), "trace", true)
+            ESX.Trace(("PlayerStatus:getStatus(%s) for player id %s error registry does not exist!"):format(name, self.playerId), "trace", true)
         end
 
         return
     end
 
-    return self.statuses[name]
+    return status and status:getValue()
 end
 
----@return table<string, Status>
+---@return table<string, number>
 function PlayerStatus:getAllStatus()
-    return self.statuses
+    local statuses = {}
+
+    for statusName, statusData in pairs(self.statuses) do
+        statuses[statusName] = statusData:getValue()
+    end
+
+    return statuses
+end
+
+---@param name string
+---@param value number
+---@return boolean
+function PlayerStatus:setStatus(name, value)
+    local status = self.statuses[name]
+
+    if not status then
+        if DEBUG then
+            ESX.Trace(("PlayerStatus:setStatus(%s) for player id %s error registry does not exist!"):format(name, self.playerId), "trace", true)
+        end
+
+        return false
+    end
+
+    local isSuccessful = status:setValue(value)
+
+    if isSuccessful then
+        self.statebag:set(name, value, true)
+    end
+
+    return isSuccessful
 end
 
 ---@param playerId number

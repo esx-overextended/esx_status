@@ -44,18 +44,6 @@ function Status:setValue(value)
     return true
 end
 
----@param amount number
----@return boolean
-function Status:increaseValue(amount)
-    return self:setValue(self.amount + amount)
-end
-
----@param amount number
----@return boolean
-function Status:decreaseValue(amount)
-    return self:setValue(self.amount - amount)
-end
-
 ---@param name string
 ---@param value number
 ---@return Status?

@@ -41,9 +41,8 @@ AddEventHandler("esx:playerDropped", onPlayerDropped)
 ---@return number?
 function utils.api.getPlayerStatus(playerId, status)
     local player = tracker:getPlayer(playerId)
-    local playerStatus = player and player:getStatus(status)
 
-    return playerStatus and playerStatus:getValue()
+    return player and player:getStatus(status)
 end
 
 ---Generates an export to set the specified player's status value
@@ -53,9 +52,8 @@ end
 ---@return boolean?
 function utils.api.setPlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
-    local playerStatus = player and player:getStatus(status)
 
-    return playerStatus and playerStatus:setValue(amount)
+    return player and player:setStatus(status, amount)
 end
 
 ---Generates an export to increase the specified player's status value
@@ -65,9 +63,8 @@ end
 ---@return boolean?
 function utils.api.increasePlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
-    local playerStatus = player and player:getStatus(status)
 
-    return playerStatus and playerStatus:increaseValue(amount)
+    return player and player:setStatus(status, player:getStatus(status) + amount)
 end
 
 ---Generates an export to decrease the specified player's status value
@@ -79,7 +76,7 @@ function utils.api.decreasePlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
     local playerStatus = player and player:getStatus(status)
 
-    return playerStatus and playerStatus:decreaseValue(amount)
+    return player and player:setStatus(status, player:getStatus(status) - amount)
 end
 
 ---@param resource string
