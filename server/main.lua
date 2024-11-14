@@ -4,19 +4,25 @@ GlobalState:set("statuses", config.statuses, true)
 
 local tracker = require("class.PlayerStatusRegistry")()
 
-AddEventHandler("esx:playerLoaded", function(playerId, xPlayer)
+---@param playerId number
+---@param xPlayer table
+local function onPlayerLoaded(playerId, xPlayer)
     if tracker:addPlayer(playerId, xPlayer.metadata.statuses) then
         TriggerEvent("esx_status:playerAdded", playerId)
         Entity(playerId).state:set("esx_status:loaded", true, true)
     end
-end)
+end
 
-AddEventHandler("esx:playerDropped", function(playerId)
+---@param playerId number
+local function onPlayerDropped(playerId)
     if tracker:removePlayer(playerId) then
         TriggerEvent("esx_status:playerRemoved", playerId)
         Entity(playerId).state:set("esx_status:loaded", false, true)
     end
-end)
+end
+
+AddEventHandler("esx:playerLoaded", onPlayerLoaded)
+AddEventHandler("esx:playerDropped", onPlayerDropped)
 
 ---Generates an export to retrieve the specified player's status value
 ---@param playerId number
@@ -74,3 +80,14 @@ end
 
 AddEventHandler("onResourceStop", onResourceStop)
 AddEventHandler("onServerResourceStop", onResourceStop)
+
+---Setup the status system for players that are already logged in (in case of resource restart)
+do
+    local xPlayers, count = ESX.GetExtendedPlayers()
+
+    for i = 1, count, 1 do
+        local xPlayer = xPlayers[i]
+
+        onPlayerLoaded(xPlayer.playerId, xPlayer)
+    end
+end
