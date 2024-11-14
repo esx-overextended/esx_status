@@ -2,6 +2,8 @@
 ---@field name string
 ---@field value number
 local Status = {}
+Status.__index = Status
+
 setmetatable(Status, {
     __index = Status,
     __metatable = false

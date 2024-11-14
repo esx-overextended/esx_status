@@ -3,6 +3,8 @@
 ---@field statuses table<string, Status>
 ---@field statebag { set: fun(self, bagName: string, value: any, replicated?: boolean) }
 local PlayerStatus = {}
+PlayerStatus.__index = PlayerStatus
+
 setmetatable(PlayerStatus, {
     __index = PlayerStatus,
     __metatable = false
@@ -81,7 +83,7 @@ return function(playerId, restoredStatuses)
     local self = setmetatable({
         statuses = {},
         playerId = playerId,
-        statebag = Entity(playerId).state
+        statebag = Player(playerId).state
     }, PlayerStatus)
 
     for statusName, configData in pairs(GlobalState.statuses) do

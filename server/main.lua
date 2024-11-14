@@ -1,15 +1,13 @@
-local utils  = require("shared.utils")
-local config = require("shared.config")
-GlobalState:set("statuses", config.statuses, true)
-
+local utils   = require("shared.utils")
+local config  = require("shared.config")
 local tracker = require("class.PlayerStatusRegistry")()
 
 ---@param playerId number
 ---@param xPlayer table
 local function onPlayerLoaded(playerId, xPlayer)
-    if tracker:addPlayer(playerId, xPlayer.metadata.statuses) then
+    if tracker:addPlayer(playerId, xPlayer.metadata.statuses or {}) then
         TriggerEvent("esx_status:playerAdded", playerId)
-        Entity(playerId).state:set("esx_status:loaded", true, true)
+        Player(playerId).state:set("esx_status:loaded", true, true)
     end
 end
 
@@ -17,7 +15,7 @@ end
 local function onPlayerDropped(playerId)
     if tracker:removePlayer(playerId) then
         TriggerEvent("esx_status:playerRemoved", playerId)
-        Entity(playerId).state:set("esx_status:loaded", false, true)
+        Player(playerId).state:set("esx_status:loaded", false, true)
     end
 end
 
@@ -83,6 +81,12 @@ AddEventHandler("onServerResourceStop", onResourceStop)
 
 ---Setup the status system for players that are already logged in (in case of resource restart)
 do
+    CreateThread(function()
+        GlobalState:set("statuses", config.statuses, true)
+    end)
+
+    Wait(1000) -- wait for global statebag to initializes
+
     local xPlayers, count = ESX.GetExtendedPlayers()
 
     for i = 1, count, 1 do

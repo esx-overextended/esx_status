@@ -2,6 +2,8 @@
 ---@field count number
 ---@field registry table<string, PlayerStatus>
 local PlayerStatusRegistry = {}
+PlayerStatusRegistry.__index = PlayerStatusRegistry
+
 setmetatable(PlayerStatusRegistry, {
     __index = PlayerStatusRegistry,
     __metatable = false
