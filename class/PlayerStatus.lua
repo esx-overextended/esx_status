@@ -18,9 +18,7 @@ local DEBUG  = require("shared.config").debug
 ---@return boolean
 function PlayerStatus:registerStatus(name, value)
     if self.statuses[name] then
-        if DEBUG then
-            ESX.Trace("PlayerStatus:registerStatus error status already exist!", "error", true)
-        end
+        ESX.Trace(("PlayerStatus:registerStatus(%s) for player id %s error status already exist!"):format(name, self.playerId), "error", true)
 
         return false
     end
@@ -32,6 +30,10 @@ function PlayerStatus:registerStatus(name, value)
         self.statebag:set(name, value, true)
     end
 
+    if DEBUG then
+        ESX.Trace(("PlayerStatus:registerStatus(%s, %s) for player id %s was %s"):format(name, value, self.playerId, instance and "successful" or "unsuccessful"), "trace", true)
+    end
+
     return instance and true or false
 end
 
@@ -39,15 +41,17 @@ end
 ---@return boolean
 function PlayerStatus:unregisterStatus(name)
     if not self.statuses[name] then
-        if DEBUG then
-            ESX.Trace("PlayerStatus:unregisterStatus error status does not exist!", "error", true)
-        end
+        ESX.Trace(("PlayerStatus:unregisterStatus(%s) for player id %s error status does not exist!"):format(name, self.playerId), "error", true)
 
         return false
     end
 
     self.statuses[name] = nil
     self.statebag:set(name, nil, true)
+
+    if DEBUG then
+        ESX.Trace(("PlayerStatus:unregisterStatus(%s) for player id %s was successful"):format(name, self.playerId), "trace", true)
+    end
 
     return true
 end
@@ -63,7 +67,7 @@ end
 function PlayerStatus:getStatus(name)
     if not self.statuses[name] then
         if DEBUG then
-            ESX.Trace("PlayerStatus:getStatus error status does not exist!", "error", true)
+            ESX.Trace(("PlayerStatus:getStatus(%s) error registry does not exist!"):format(self.playerId), "trace", true)
         end
 
         return
@@ -79,7 +83,19 @@ end
 
 ---@param playerId number
 ---@param restoredStatuses table<string, number>
+---@return PlayerStatus?
 return function(playerId, restoredStatuses)
+    local typePlayerId = type(playerId)
+    local typeRestoredStatuses = type(restoredStatuses)
+
+    if typePlayerId ~= "number" then
+        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Received '%s', expected 'number'"):format(typePlayerId), "error", true)
+    end
+
+    if typeRestoredStatuses ~= "table" then
+        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Received '%s', expected 'table'"):format(typeRestoredStatuses), "error", true)
+    end
+
     local self = setmetatable({
         statuses = {},
         playerId = playerId,

@@ -22,17 +22,13 @@ end
 ---@return boolean
 function PlayerStatusRegistry:addPlayer(playerId, restoredStatuses)
     if self.registry[playerId] then
-        if DEBUG then
-            ESX.Trace("PlayerStatusRegistry:addPlayer error registry already exist!", "error", true)
-        end
+        ESX.Trace(("PlayerStatusRegistry:addPlayer(%s) error registry already exist!"):format(playerId), "error", true)
 
         return false
     end
 
     if type(playerId) ~= "number" or type(restoredStatuses) ~= "table" then
-        if DEBUG then
-            ESX.Trace("PlayerStatusRegistry:addPlayer error type!", "error", true)
-        end
+        ESX.Trace(("PlayerStatusRegistry:addPlayer(%s) error type!"):format(playerId), "error", true)
 
         return false
     end
@@ -44,6 +40,10 @@ function PlayerStatusRegistry:addPlayer(playerId, restoredStatuses)
         self.registry[playerId] = instance
     end
 
+    if DEBUG then
+        ESX.Trace(("PlayerStatusRegistry:addPlayer(%s) was %s"):format(playerId, instance and "successful" or "unsuccessful"), "trace", true)
+    end
+
     return instance and true or false
 end
 
@@ -51,17 +51,13 @@ end
 ---@return boolean
 function PlayerStatusRegistry:removePlayer(playerId)
     if not self.registry[playerId] then
-        if DEBUG then
-            ESX.Trace("PlayerStatusRegistry:removePlayer error registry does not exist!", "error", true)
-        end
+        ESX.Trace(("PlayerStatusRegistry:removePlayer(%s) error registry does not exist!"):format(playerId), "error", true)
 
         return false
     end
 
     if type(playerId) ~= "number" then
-        if DEBUG then
-            ESX.Trace("PlayerStatusRegistry:removePlayer error type!", "error", true)
-        end
+        ESX.Trace(("PlayerStatusRegistry:removePlayer(%s) error type!"):format(playerId), "error", true)
 
         return false
     end
@@ -71,6 +67,9 @@ function PlayerStatusRegistry:removePlayer(playerId)
     self.count -= 1
     self.registry[playerId] = nil
 
+    if DEBUG then
+        ESX.Trace(("PlayerStatusRegistry:removePlayer(%s) was successful"):format(playerId), "trace", true)
+    end
 
     return true
 end
@@ -80,7 +79,7 @@ end
 function PlayerStatusRegistry:getPlayer(playerId)
     if not self.registry[playerId] then
         if DEBUG then
-            ESX.Trace("PlayerStatusRegistry:getPlayer error registry does not exist!", "error", true)
+            ESX.Trace(("PlayerStatusRegistry:getPlayer(%s) error registry does not exist!"):format(playerId), "trace", true)
         end
 
         return

@@ -26,16 +26,14 @@ end
 ---@return boolean
 function Status:setValue(value)
     if type(value) ~= "number" then
-        if DEBUG then
-            ESX.Trace("Status:setValue error type!", "error", true)
-        end
+        ESX.Trace(("Status:setValue(%s) for %s error type!"):format(value, self.name), "error", true)
 
         return false
     end
 
     if not utils.isValueValid(value) then
         if DEBUG then
-            ESX.Trace("Status:setValue error isValueValid!", "error", true)
+            ESX.Trace(("Status:setValue(%s) for %s error value is not valid!"):format(value, self.name), "trace", true)
         end
 
         return false
@@ -62,8 +60,15 @@ end
 ---@param value number
 ---@return Status?
 return function(name, value)
-    if type(name) ~= "string" or type(value) ~= "number" then
-        return ESX.Trace("Invalid parameters passed while creating an instance of Status class!", "error", true)
+    local typeName = type(name)
+    local typeValue = type(value)
+
+    if typeName ~= "string" then
+        return ESX.Trace(("Invalid nam passed while creating an instance of Status class! Received '%s', expected 'number'"):format(typeName), "error", true)
+    end
+
+    if typeValue ~= "number" then
+        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Received '%s', expected 'string'"):format(typeValue), "error", true)
     end
 
     return setmetatable({

@@ -1,21 +1,34 @@
 local utils   = require("shared.utils")
 local config  = require("shared.config")
 local tracker = require("class.PlayerStatusRegistry")()
+local DEBUG   = config.debug
 
 ---@param playerId number
 ---@param xPlayer table
 local function onPlayerLoaded(playerId, xPlayer)
-    if tracker:addPlayer(playerId, xPlayer.metadata.statuses or {}) then
+    local isSuccessful = tracker:addPlayer(playerId, xPlayer.metadata.statuses or {})
+
+    if isSuccessful then
         TriggerEvent("esx_status:playerAdded", playerId)
         Player(playerId).state:set("esx_status:loaded", true, true)
+    end
+
+    if DEBUG then
+        ESX.Trace(("Loading of playerId %s into the system was %s"):format(playerId, isSuccessful and "successful" or "unsuccessful"), "trace", true)
     end
 end
 
 ---@param playerId number
 local function onPlayerDropped(playerId)
-    if tracker:removePlayer(playerId) then
+    local isSuccessful = tracker:removePlayer(playerId)
+
+    if isSuccessful then
         TriggerEvent("esx_status:playerRemoved", playerId)
         Player(playerId).state:set("esx_status:loaded", false, true)
+    end
+
+    if DEBUG then
+        ESX.Trace(("Removing of playerId %s from the system was %s"):format(playerId, isSuccessful and "successful" or "unsuccessful"), "trace", true)
     end
 end
 
