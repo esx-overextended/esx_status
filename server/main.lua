@@ -205,8 +205,7 @@ end
 -----------------EXPORTS-----------------
 -----------------------------------------
 
-local statusDecayAmount = 0.2    -- Amount to decrease from each status
-local BATCH_SIZE = 32            -- Static batch size
+local BATCH_SIZE = 32 --Static batch size
 
 CreateThread(function()
     while true do
@@ -214,48 +213,43 @@ CreateThread(function()
         
         local batchStart = 1
         local validStatuses = {}
-        local allPlayers = GetPlayers()
-        local numOfPlayers = #allPlayers
+        local allPlayers, numOfPlayers = ESX.GetExtendedPlayers()
         
         for name, data in pairs(GlobalState["statuses"]) do
-            validStatuses[name] = type(value.update) and value.update
+            validStatuses[name] = type(data.update) and data.update
         end
 
         while batchStart <= numOfPlayers do
             local batchEnd = math.min(batchStart + BATCH_SIZE - 1, numOfPlayers)
-            local statusesChanged = false
+            local anyStatusChanged = false
 
-            -- Process each player in the batch
+            -- process each player in the batch
             for i = batchStart, batchEnd do
-                local playerId = allPlayers[i]
-                local player = tracker:getPlayer(playerId)
+                local xPlayer = allPlayers[i]
+                local player = tracker:getPlayer(xPlayer.playerId)
 
                 if not player then goto skipPlayer end
-                
+
                 local playerStatuses = player:getAllStatus()
 
-                -- Iterate through each player's statuses and apply decay
                 for statusName, statusValue in pairs(playerStatuses) do
-                    if validStatuses[statusName] then
-                        if player:setStatus(statusName, statusValue - validStatuses[statusName]) then
-                            statusesChanged = true
+                    local updateAmount = validStatuses[statusName]
+
+                    if updateAmount then
+                        if player:setStatus(statusName, statusValue - updateAmount) then
+                            anyStatusChanged = true
                         end
                     end   
                 end
 
-                --TODO reduce function calls by getting all framework players at once
-                if statusesChanged then
-                    local xPlayer = ESX.GetPlayerFromId(playerId)
-
-                    if xPlayer then
-                        xPlayer.setMetadata("statuses", player:getAllStatus())
-                    end
+                if anyStatusChanged then
+                    xPlayer.setMetadata("statuses", player:getAllStatus())
                 end
 
                 ::skipPlayer::
             end
 
-            -- Move to the next batch and apply delay
+            -- move to the next batch and apply delay
             batchStart = batchEnd + 1
             Citizen.Wait(100)  -- Apply delay after each batch
         end
