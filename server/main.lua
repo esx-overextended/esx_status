@@ -34,6 +34,12 @@ end
 
 ---@param playerId number
 local function onPlayerDropped(playerId)
+    local player = tracker:getPlayer(playerId)
+    local xPlayer = player and ESX.GetPlayerFromId(playerId)
+
+    ---@diagnostic disable-next-line: need-check-nil
+    if xPlayer then xPlayer.setMetadata("statuses", player:getAllStatus()) end
+
     local isSuccessful = tracker:removePlayer(playerId)
 
     if isSuccessful then
@@ -52,6 +58,10 @@ AddEventHandler("esx:playerDropped", onPlayerDropped)
 ---@param resource string
 local function onResourceStop(resource)
     if resource == cache.resource then
+        for playerId in pairs(tracker:getAllPlayers()) do
+            onPlayerDropped(playerId)
+        end
+
         GlobalState:set("statuses", nil, true)
 
         if DEBUG then
@@ -205,18 +215,18 @@ end
 -----------------EXPORTS-----------------
 -----------------------------------------
 
-local BATCH_SIZE = 32 --Static batch size
+local BATCH_SIZE = 32
 
 CreateThread(function()
     while true do
-        Citizen.Wait(config.updateInterval)
-        
+        Wait(config.updateInterval)
+
         local batchStart = 1
         local validStatuses = {}
         local allPlayers, numOfPlayers = ESX.GetExtendedPlayers()
-        
+
         for name, data in pairs(GlobalState["statuses"]) do
-            validStatuses[name] = type(data.update) and data.update
+            validStatuses[name] = type(data.update) == "number" and data.update
         end
 
         while batchStart <= numOfPlayers do
@@ -236,14 +246,14 @@ CreateThread(function()
                     local updateAmount = validStatuses[statusName]
 
                     if updateAmount then
-                        if player:setStatus(statusName, statusValue - updateAmount) then
+                        if player:setStatus(statusName, statusValue + updateAmount) then
                             anyStatusChanged = true
                         end
-                    end   
+                    end
                 end
 
                 if anyStatusChanged then
-                    xPlayer.setMetadata("statuses", player:getAllStatus())
+                    xPlayer.setMetadata("statuses", playerStatuses)
                 end
 
                 ::skipPlayer::
@@ -251,7 +261,8 @@ CreateThread(function()
 
             -- move to the next batch and apply delay
             batchStart = batchEnd + 1
-            Citizen.Wait(100)  -- Apply delay after each batch
+
+            Wait(100) -- Apply delay after each batch
         end
     end
 end)
