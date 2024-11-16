@@ -34,6 +34,12 @@ end
 
 ---@param playerId number
 local function onPlayerDropped(playerId)
+    local player = tracker:getPlayer(playerId)
+    local xPlayer = player and ESX.GetPlayerFromId(playerId)
+
+    ---@diagnostic disable-next-line: need-check-nil
+    if xPlayer then xPlayer.setMetadata("statuses", player:getAllStatus()) end
+
     local isSuccessful = tracker:removePlayer(playerId)
 
     if isSuccessful then
@@ -52,6 +58,10 @@ AddEventHandler("esx:playerDropped", onPlayerDropped)
 ---@param resource string
 local function onResourceStop(resource)
     if resource == cache.resource then
+        for playerId in pairs(tracker:getAllPlayers()) do
+            onPlayerDropped(playerId)
+        end
+
         GlobalState:set("statuses", nil, true)
 
         if DEBUG then
@@ -204,3 +214,55 @@ end
 -----------------------------------------
 -----------------EXPORTS-----------------
 -----------------------------------------
+
+local BATCH_SIZE = 32
+
+CreateThread(function()
+    while true do
+        Wait(config.updateInterval)
+
+        local batchStart = 1
+        local validStatuses = {}
+        local allPlayers, numOfPlayers = ESX.GetExtendedPlayers()
+
+        for name, data in pairs(GlobalState["statuses"]) do
+            validStatuses[name] = type(data.update) == "number" and data.update
+        end
+
+        while batchStart <= numOfPlayers do
+            local batchEnd = math.min(batchStart + BATCH_SIZE - 1, numOfPlayers)
+            local anyStatusChanged = false
+
+            -- process each player in the batch
+            for i = batchStart, batchEnd do
+                local xPlayer = allPlayers[i]
+                local player = tracker:getPlayer(xPlayer.playerId)
+
+                if not player then goto skipPlayer end
+
+                local playerStatuses = player:getAllStatus()
+
+                for statusName, statusValue in pairs(playerStatuses) do
+                    local updateAmount = validStatuses[statusName]
+
+                    if updateAmount then
+                        if player:setStatus(statusName, statusValue + updateAmount) then
+                            anyStatusChanged = true
+                        end
+                    end
+                end
+
+                if anyStatusChanged then
+                    xPlayer.setMetadata("statuses", playerStatuses)
+                end
+
+                ::skipPlayer::
+            end
+
+            -- move to the next batch and apply delay
+            batchStart = batchEnd + 1
+
+            Wait(100) -- Apply delay after each batch
+        end
+    end
+end)

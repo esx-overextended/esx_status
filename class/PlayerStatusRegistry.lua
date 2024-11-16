@@ -1,6 +1,6 @@
 ---@class PlayerStatusRegistry
 ---@field count number
----@field registry table<string, PlayerStatus>
+---@field registry table<number, PlayerStatus>
 local PlayerStatusRegistry = {}
 PlayerStatusRegistry.__index = PlayerStatusRegistry
 
@@ -88,7 +88,7 @@ function PlayerStatusRegistry:getPlayer(playerId)
     return self.registry[playerId]
 end
 
----@return table<string, PlayerStatus>
+---@return table<number, PlayerStatus>
 function PlayerStatusRegistry:getAllPlayers()
     return self.registry
 end
