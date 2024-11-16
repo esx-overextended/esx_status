@@ -1,6 +1,6 @@
 ---@class Status
 ---@field name string
----@field value number
+---@field value number | string | boolean
 local Status = {}
 Status.__index = Status
 
@@ -25,13 +25,15 @@ end
 ---@param value number
 ---@return boolean
 function Status:setValue(value)
-    if type(value) ~= "number" then
-        ESX.Trace(("Status:setValue(%s) for %s error type!"):format(value, self.name), "error", true)
+    local typeValue = type(value)
+
+    if typeValue ~= "number" and typeValue ~= "string" and typeValue ~= "boolean" then
+        ESX.Trace(("Status:setValue(%s) for %s error type! Expected 'number' or 'string' or 'boolean', received '%s'"):format(value, self.name, typeValue), "error", true)
 
         return false
     end
 
-    if not utils.isValueValid(value) then
+    if not utils.isStatusValueValid(self.name, value) then
         if DEBUG then
             ESX.Trace(("Status:setValue(%s) for %s error value is not valid!"):format(value, self.name), "trace", true)
         end
