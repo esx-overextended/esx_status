@@ -1,8 +1,9 @@
 ---@class StatusConfig
----@field value number | string | boolean
----@field min? number
----@field max? number
----@field update? number
+---@field value number | string | boolean -- (mandatory) default value
+---@field min? number -- (optional) only works if value type is number
+---@field max? number -- (optional) only works if value type is number
+---@field update? number -- (optional) only works if value type is number
+---@field acceptedValues? string[] -- (optional) only works if value type is string
 
 return {
     debug = true,
@@ -43,5 +44,13 @@ return {
         --     value = 0,
         --     update = 0.01
         -- },
+        -- growth = {
+        --     value = "",
+        --     acceptedValues = {
+        --         "low",
+        --         "medium",
+        --         "high"
+        --     }
+        -- }
     }
 }

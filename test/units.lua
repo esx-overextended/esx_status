@@ -118,6 +118,24 @@ function UnitTests.TestStatusStringTypeManipulation()
         assertEqual(status:getValue(), "John", "Status:getValue: Value remains unchanged after invalid type")
 end
 
+-- Test case: Validate manipulation of string type status with strict accepted values, including type checks
+function UnitTests.TestStatusStringTypeWithStrictAcceptedValuesManipulation()
+    local Status = require("class.Status")
+    local status = Status("growth", "low")
+
+    return assertEqual(status:getName(), "growth", "Status:getName: Correct name for string type with strict accepted values") and
+        assertEqual(status:getValue(), "low", "Status:getValue: Correct initial value for string type with strict accepted values") and
+        -- Valid string update
+        assertEqual(status:setValue("high"), true, "Status:setValue: Correct update to string for status with strict accepted values") and
+        assertEqual(status:getValue(), "high", "Status:getValue: Correct value after setting valid string for status with strict accepted values") and
+        -- Invalid type setting
+        assertEqual(status:setValue(100), false, "Status:setValue: Reject non-string type (number) for string status with strict accepted values") and
+        assertEqual(status:getValue(), "high", "Status:getValue: Value remains unchanged after invalid type for string status with strict accepted values") and
+        -- Invalid value setting
+        assertEqual(status:setValue("random string value"), false, "Status:setValue: Reject invalid string value for status with strict accepted values") and
+        assertEqual(status:getValue(), "high", "Status:getValue: Value remains unchanged after invalid value for status with strict accepted values")
+end
+
 -- Test case: Validate manipulation of boolean type status, including type checks
 function UnitTests.TestStatusBooleanTypeManipulation()
     local Status = require("class.Status")
@@ -163,12 +181,13 @@ end
 ---Test Runner with failure handling
 return mutateESXTrace(function()
     local OGStatuses = require("shared.config").statuses
-    require("shared.config").statuses = {              -- mock config for using in unit tests
-        money    = { value = 0 },                      -- number type value with no min/max limit
-        age      = { value = 0, min = 0 },             -- number type value with no min limit
-        health   = { value = 50, min = 0, max = 100 }, -- number type value with min and max limit
-        name     = { value = "none" },                 -- string type value
-        hasPhone = { value = false }                   -- boolean type value
+    require("shared.config").statuses = {                                        -- mock config for using in unit tests
+        money    = { value = 0 },                                                -- number type value with no min/max limit
+        age      = { value = 0, min = 0 },                                       -- number type value with no min limit
+        health   = { value = 50, min = 0, max = 100 },                           -- number type value with min and max limit
+        name     = { value = "none" },                                           -- string type value
+        growth   = { value = "", acceptedValues = { "low", "medium", "high" } }, -- string type value with strict accepted values
+        hasPhone = { value = false }                                             -- boolean type value
     }
 
     for test, func in pairs(UnitTests) do
@@ -186,6 +205,8 @@ return mutateESXTrace(function()
     end
 
     require("shared.config").statuses = OGStatuses
+
+    --TODO: check to see if refreshAcceptedStringValues() within utils file need to be triggered after resetting the config.status or not
 
     return true
 end)
