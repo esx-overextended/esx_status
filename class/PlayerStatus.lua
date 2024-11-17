@@ -14,7 +14,7 @@ local Status = require("class.Status")
 local DEBUG  = require("shared.config").debug
 
 ---@param name string
----@param value number
+---@param value number | string | boolean
 ---@return boolean
 function PlayerStatus:registerStatus(name, value)
     if self.statuses[name] then
@@ -63,7 +63,7 @@ function PlayerStatus:unregisterAllStatus()
 end
 
 ---@param name string
----@return number?
+---@return number | string | boolean | nil
 function PlayerStatus:getStatus(name)
     local status = self.statuses[name]
 
@@ -78,7 +78,7 @@ function PlayerStatus:getStatus(name)
     return status and status:getValue()
 end
 
----@return table<string, number>
+---@return table<string, number | string | boolean>
 function PlayerStatus:getAllStatus()
     local statuses = {}
 
@@ -90,7 +90,7 @@ function PlayerStatus:getAllStatus()
 end
 
 ---@param name string
----@param value number
+---@param value number | string | boolean
 ---@return boolean
 function PlayerStatus:setStatus(name, value)
     local status = self.statuses[name]
@@ -113,18 +113,18 @@ function PlayerStatus:setStatus(name, value)
 end
 
 ---@param playerId number
----@param restoredStatuses table<string, number>
+---@param restoredStatuses table<string, number | string | boolean>
 ---@return PlayerStatus?
 return function(playerId, restoredStatuses)
     local typePlayerId = type(playerId)
     local typeRestoredStatuses = type(restoredStatuses)
 
     if typePlayerId ~= "number" then
-        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Received '%s', expected 'number'"):format(typePlayerId), "error", true)
+        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Expected 'number', Received '%s'"):format(typePlayerId), "error", true)
     end
 
     if typeRestoredStatuses ~= "table" then
-        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Received '%s', expected 'table'"):format(typeRestoredStatuses), "error", true)
+        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Expected 'table', Received '%s'"):format(typeRestoredStatuses), "error", true)
     end
 
     local self = setmetatable({

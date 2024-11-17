@@ -158,7 +158,7 @@ end
 ---Generates an export to retrieve the specified player's status value
 ---@param playerId number
 ---@param status string
----@return number?
+---@return number | string | boolean | nil
 function utils.api.getPlayerStatus(playerId, status)
     local player = tracker:getPlayer(playerId)
 
@@ -167,7 +167,7 @@ end
 
 ---Generates an export to retrieve all of the specified player's status values
 ---@param playerId number
----@return table<string, number>?
+---@return table<string, number | string | boolean>?
 function utils.api.getAllPlayerStatus(playerId)
     local player = tracker:getPlayer(playerId)
 
@@ -177,12 +177,12 @@ end
 ---Generates an export to set the specified player's status value
 ---@param playerId number
 ---@param status string
----@param amount number
+---@param value number | string | boolean
 ---@return boolean?
-function utils.api.setPlayerStatus(playerId, status, amount)
+function utils.api.setPlayerStatus(playerId, status, value)
     local player = tracker:getPlayer(playerId)
 
-    return player and player:setStatus(status, amount)
+    return player and player:setStatus(status, value)
 end
 
 ---Generates an export to increase the specified player's status value
