@@ -206,7 +206,8 @@ return mutateESXTrace(function()
 
     require("shared.config").statuses = OGStatuses
 
-    --TODO: check to see if refreshAcceptedStringValues() within utils file need to be triggered after resetting the config.status or not
+    --Refresh accepted string values after resetting the config.statuses
+    require("shared.utils").refreshAcceptedStringValues(OGStatuses)
 
     return true
 end)

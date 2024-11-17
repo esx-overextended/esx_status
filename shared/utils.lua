@@ -3,10 +3,11 @@ local statuses = require("shared.config").statuses --[[@as table<string, StatusC
 local toBoolean = { ["false"] = false, ["true"] = true, [0] = false, [1] = true }
 local acceptedStringValues = {}
 
-local function refreshAcceptedStringValues()
+---@param receivedStatuses? table<string, StatusConfig>
+function utils.refreshAcceptedStringValues(receivedStatuses)
     table.wipe(acceptedStringValues)
 
-    for statusName, statusConfig in pairs(statuses) do
+    for statusName, statusConfig in pairs(receivedStatuses or statuses) do
         if statusConfig.acceptedValues then
             acceptedStringValues[statusName] = {}
 
@@ -17,7 +18,7 @@ local function refreshAcceptedStringValues()
     end
 end
 
-do refreshAcceptedStringValues() end
+do utils.refreshAcceptedStringValues() end
 
 AddStateBagChangeHandler("statuses", "global", function(_, _, value)
     if not value then return end
@@ -26,7 +27,7 @@ AddStateBagChangeHandler("statuses", "global", function(_, _, value)
 
     statuses = value
 
-    refreshAcceptedStringValues()
+    utils.refreshAcceptedStringValues()
 end)
 
 ---@param value number | string

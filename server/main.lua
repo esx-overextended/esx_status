@@ -93,6 +93,8 @@ AddEventHandler("onServerResourceStop", onResourceStop)
 CreateThread(function()
     GlobalState:set("statuses", config.statuses, true)
 
+    Wait(1000) -- wait for global statebag to initializes
+
     local xPlayers, count = ESX.GetExtendedPlayers()
 
     for i = 1, count, 1 do
