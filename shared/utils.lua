@@ -1,9 +1,49 @@
 local utils = {}
+local statuses = require("shared.config").statuses --[[@as table<string, StatusConfig>]]
+local toBoolean = { ["false"] = false, ["true"] = true, [0] = false, [1] = true }
 
----@param amount number
+AddStateBagChangeHandler("statuses", "global", function(_, _, value)
+    if not value then return end
+
+    ---@cast value table<string, StatusConfig>
+
+    statuses = value
+end)
+
+---@param value number | string
+---@return boolean?
+function utils.toBoolean(value)
+    local booleanValue = toBoolean[value]
+    return type(booleanValue) == "boolean" and booleanValue or nil
+end
+
+---@param name string
+---@param value number | string | boolean
 ---@return boolean
-function utils.isValueValid(amount)
-    return type(amount) == "number" and (amount >= 0 and amount <= 100)
+function utils.isStatusValueValid(name, value)
+    if not statuses[name] then return false end
+
+    local status = statuses[name]
+    local receivedType = type(value)
+    local expectedType = type(status.value)
+
+    if expectedType == "number" and receivedType == "number" then
+        if status.min and value < status.min then return false end
+        if status.max and value > status.max then return false end
+
+        return true
+    elseif expectedType == "string" and receivedType == "string" then
+        --TODO strict string value based on an declared enum in config?
+        return true
+    elseif expectedType == "boolean" then
+        if receivedType == "boolean" then
+            return true
+        elseif receivedType == "string" or receivedType == "number" then
+            return type(utils.toBoolean(value)) ~= "nil" and true
+        end
+    end
+
+    return false
 end
 
 utils.api = setmetatable({}, {

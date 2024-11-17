@@ -10,7 +10,7 @@ local function assertEqual(actual, expected, testName)
     if isSuccessful then
         printMessage = "^2PASS^7: " .. testName
     else
-        printMessage = "^1FAIL^7: " .. testName .. " (expected " .. tostring(expected) .. ", got " .. tostring(actual) .. ")"
+        printMessage = "^1FAIL^7: " .. testName .. " (expected ^5" .. tostring(expected) .. "^7, received ^1" .. tostring(actual) .. "^7)"
     end
 
     if DEBUG then print(printMessage) end
@@ -29,62 +29,148 @@ local function mutateESXTrace(func)
     return result
 end
 
----Individual Tests
+-----------------------------------------
+----------------UNIT TESTS---------------
+-----------------------------------------
+
+-- Test case: Validate initial creation of status object with name and value
 function UnitTests.TestStatusCreation()
     local Status = require("class.Status")
     local status = Status("health", 50)
 
     return mutateESXTrace(function()
-        return assertEqual(status:getName(), "health", "Status:getName") and assertEqual(status:getValue(), 50, "Status:getValue")
+        return assertEqual(status:getName(), "health", "Status:getName: Correct name on creation") and
+            assertEqual(status:getValue(), 50, "Status:getValue: Correct initial value on creation")
     end)
 end
 
-function UnitTests.TestStatusManipulation()
+-- Test case: Validate manipulation of numeric status without limits, including type checks
+function UnitTests.TestStatusNumericTypeNoLimitsManipulation()
     local Status = require("class.Status")
-    local status = Status("stamina", 30)
-    status:setValue(40)
+    local status = Status("money", 0)
 
-    return mutateESXTrace(function()
-        return assertEqual(status:getValue(), 40, "Status:setValue")
-    end)
+    return assertEqual(status:getName(), "money", "Status:getName: Correct name for numeric type") and
+        assertEqual(status:getValue(), 0, "Status:getValue: Correct initial value for numeric type") and
+        -- Invalid type setting
+        assertEqual(status:setValue("not a number"), false, "Status:setValue: Reject invalid type (string)") and
+        assertEqual(status:getValue(), 0, "Status:getValue: Value remains unchanged after invalid type") and
+        -- Valid positive and negative number setting
+        assertEqual(status:setValue(500), true, "Status:setValue: Accept valid positive number") and
+        assertEqual(status:getValue(), 500, "Status:getValue: Correct value after setting valid positive number") and
+        assertEqual(status:setValue(-500), true, "Status:setValue: Accept valid negative number") and
+        assertEqual(status:getValue(), -500, "Status:getValue: Correct value after setting valid negative number") and
+        -- Test setting a non-numeric value
+        assertEqual(status:setValue("non-numeric"), false, "Status:setValue: Reject non-numeric type (string)") and
+        assertEqual(status:getValue(), -500, "Status:getValue: Value remains unchanged after non-numeric value")
 end
 
-function UnitTests.TestStatusInvalidSet()
+-- Test case: Validate manipulation of numeric status with minimum limit and error handling for invalid types
+function UnitTests.TestStatusNumericTypeWithMinLimitManipulation()
     local Status = require("class.Status")
-    local status = Status("strength", 80)
+    local status = Status("age", 0)
 
-    return mutateESXTrace(function()
-        return assertEqual(status:setValue("not a number"), false, "Status:setValue invalid type") and assertEqual(status:setValue(-10), false, "Status:setValue out-of-range") and
-            assertEqual(status:getValue(), 80, "Status unchanged after invalid set")
-    end)
+    return assertEqual(status:getName(), "age", "Status:getName: Correct name for numeric type with min limit") and
+        assertEqual(status:getValue(), 0, "Status:getValue: Correct initial value for numeric type with min limit") and
+        -- Invalid type setting
+        assertEqual(status:setValue("not a number"), false, "Status:setValue: Reject invalid type (string)") and
+        assertEqual(status:getValue(), 0, "Status:getValue: Value remains unchanged after invalid type") and
+        -- Valid value within range
+        assertEqual(status:setValue(25), true, "Status:setValue: Accept valid number within range") and
+        assertEqual(status:getValue(), 25, "Status:getValue: Correct value after setting valid number") and
+        -- Invalid value below min limit
+        assertEqual(status:setValue(-10), false, "Status:setValue: Reject value below min limit") and
+        assertEqual(status:getValue(), 25, "Status:getValue: Value remains unchanged after setting below min limit")
 end
 
----PlayerStatus Tests
+-- Test case: Validate manipulation of numeric status with min and max limits, including boundary checks
+function UnitTests.TestStatusNumericTypeWithLimitsManipulation()
+    local Status = require("class.Status")
+    local status = Status("health", 50)
+
+    return assertEqual(status:getName(), "health", "Status:getName: Correct name for numeric type with limits") and
+        assertEqual(status:getValue(), 50, "Status:getValue: Correct initial value within limits") and
+        -- Valid value within range
+        assertEqual(status:setValue(75), true, "Status:setValue: Accept valid value within limits") and
+        assertEqual(status:getValue(), 75, "Status:getValue: Correct value after setting valid number within limits") and
+        -- Invalid value below min limit
+        assertEqual(status:setValue(-10), false, "Status:setValue: Reject value below min limit") and
+        assertEqual(status:getValue(), 75, "Status:getValue: Value remains unchanged after setting below min limit") and
+        -- Invalid value above max limit
+        assertEqual(status:setValue(110), false, "Status:setValue: Reject value above max limit") and
+        assertEqual(status:getValue(), 75, "Status:getValue: Value remains unchanged after setting above max limit") and
+        -- Invalid type setting
+        assertEqual(status:setValue("not a number"), false, "Status:setValue: Reject invalid type (string)") and
+        assertEqual(status:getValue(), 75, "Status:getValue: Value remains unchanged after invalid type")
+end
+
+-- Test case: Validate manipulation of string type status, including type checks
+function UnitTests.TestStatusStringTypeManipulation()
+    local Status = require("class.Status")
+    local status = Status("name", "none")
+
+    return assertEqual(status:getName(), "name", "Status:getName: Correct name for string type") and
+        assertEqual(status:getValue(), "none", "Status:getValue: Correct initial value for string type") and
+        -- Valid string update
+        assertEqual(status:setValue("John"), true, "Status:setValue: Correct update to string") and
+        assertEqual(status:getValue(), "John", "Status:getValue: Correct value after setting valid string") and
+        -- Invalid type setting
+        assertEqual(status:setValue(100), false, "Status:setValue: Reject non-string type (number)") and
+        assertEqual(status:getValue(), "John", "Status:getValue: Value remains unchanged after invalid type")
+end
+
+-- Test case: Validate manipulation of boolean type status, including type checks
+function UnitTests.TestStatusBooleanTypeManipulation()
+    local Status = require("class.Status")
+    local status = Status("hasPhone", false)
+
+    return assertEqual(status:getName(), "hasPhone", "Status:getName: Correct name for boolean type") and
+        assertEqual(status:getValue(), false, "Status:getValue: Correct initial value for boolean type") and
+        -- Valid boolean update
+        assertEqual(status:setValue(true), true, "Status:setValue: Correct update to true") and
+        assertEqual(status:getValue(), true, "Status:getValue: Correct value after setting true") and
+        -- Invalid type setting
+        assertEqual(status:setValue("yes"), false, "Status:setValue: Reject non-boolean type (string)") and
+        assertEqual(status:getValue(), true, "Status:getValue: Value remains unchanged after invalid type")
+end
+
+-- Test case: Player status registration with new status
 function UnitTests.TestPlayerStatusRegister()
     local PlayerStatus = require("class.PlayerStatus")
-    local playerStatus = PlayerStatus(1, { health = 100, stamina = 50 })
+    local playerStatus = PlayerStatus(1, { health = 50, age = 30, money = 100, name = "Player1", hasPhone = true })
+
     local success = playerStatus:registerStatus("energy", 60)
 
-    return mutateESXTrace(function()
-        return assertEqual(success, true, "PlayerStatus:registerStatus") and assertEqual(playerStatus:getStatus("energy"), 60, "PlayerStatus:getStatus value")
-    end)
+    return assertEqual(success, true, "PlayerStatus:registerStatus: Successfully register new status") and
+        assertEqual(playerStatus:getStatus("energy"), 60, "PlayerStatus:getStatus: Correct value for new status")
 end
 
+-- Test case: Player status unregistration with existing and non-existing status
 function UnitTests.TestPlayerStatusUnregister()
     local PlayerStatus = require("class.PlayerStatus")
-    local playerStatus = PlayerStatus(1, { health = 100, stamina = 50 })
+    local playerStatus = PlayerStatus(1, { health = 50, age = 30, money = 100, name = "Player1", hasPhone = true })
 
     playerStatus:registerStatus("energy", 60)
-
     local success = playerStatus:unregisterStatus("energy")
 
-    return mutateESXTrace(function()
-        return assertEqual(success, true, "PlayerStatus:unregisterStatus existing") and assertEqual(playerStatus:unregisterStatus("energy"), false, "PlayerStatus:unregisterStatus non-existing")
-    end)
+    return assertEqual(success, true, "PlayerStatus:unregisterStatus: Successfully unregister existing status") and
+        assertEqual(playerStatus:unregisterStatus("energy"), false, "PlayerStatus:unregisterStatus: Fail to unregister non-existing status")
 end
+
+-----------------------------------------
+----------------TEST RUNNER---------------
+-----------------------------------------
 
 ---Test Runner with failure handling
 return mutateESXTrace(function()
+    local OGStatuses = require("shared.config").statuses
+    require("shared.config").statuses = {              -- mock config for using in unit tests
+        money    = { value = 0 },                      -- number type value with no min/max limit
+        age      = { value = 0, min = 0 },             -- number type value with no min limit
+        health   = { value = 50, min = 0, max = 100 }, -- number type value with min and max limit
+        name     = { value = "none" },                 -- string type value
+        hasPhone = { value = false }                   -- boolean type value
+    }
+
     for test, func in pairs(UnitTests) do
         if not func() then
             if DEBUG then
@@ -98,6 +184,8 @@ return mutateESXTrace(function()
     if DEBUG then
         print("^2All esx_status unit tests were passed. Starting resource...^7")
     end
+
+    require("shared.config").statuses = OGStatuses
 
     return true
 end)

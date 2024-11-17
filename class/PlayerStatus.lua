@@ -10,11 +10,12 @@ setmetatable(PlayerStatus, {
     __metatable = false
 })
 
-local Status = require("class.Status")
-local DEBUG  = require("shared.config").debug
+local Status   = require("class.Status")
+local DEBUG    = require("shared.config").debug
+local statuses = require("shared.config").statuses --[[@as table<string, StatusConfig>]]
 
 ---@param name string
----@param value number
+---@param value number | string | boolean
 ---@return boolean
 function PlayerStatus:registerStatus(name, value)
     if self.statuses[name] then
@@ -63,7 +64,7 @@ function PlayerStatus:unregisterAllStatus()
 end
 
 ---@param name string
----@return number?
+---@return number | string | boolean | nil
 function PlayerStatus:getStatus(name)
     local status = self.statuses[name]
 
@@ -78,19 +79,19 @@ function PlayerStatus:getStatus(name)
     return status and status:getValue()
 end
 
----@return table<string, number>
+---@return table<string, number | string | boolean>
 function PlayerStatus:getAllStatus()
-    local statuses = {}
+    local playerStatuses = {}
 
     for statusName, statusData in pairs(self.statuses) do
-        statuses[statusName] = statusData:getValue()
+        playerStatuses[statusName] = statusData:getValue()
     end
 
-    return statuses
+    return playerStatuses
 end
 
 ---@param name string
----@param value number
+---@param value number | string | boolean
 ---@return boolean
 function PlayerStatus:setStatus(name, value)
     local status = self.statuses[name]
@@ -112,19 +113,27 @@ function PlayerStatus:setStatus(name, value)
     return isSuccessful
 end
 
+AddStateBagChangeHandler("statuses", "global", function(_, _, value)
+    if not value then return end
+
+    ---@cast value table<string, StatusConfig>
+
+    statuses = value
+end)
+
 ---@param playerId number
----@param restoredStatuses table<string, number>
+---@param restoredStatuses table<string, number | string | boolean>
 ---@return PlayerStatus?
 return function(playerId, restoredStatuses)
     local typePlayerId = type(playerId)
     local typeRestoredStatuses = type(restoredStatuses)
 
     if typePlayerId ~= "number" then
-        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Received '%s', expected 'number'"):format(typePlayerId), "error", true)
+        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Expected 'number', Received '%s'"):format(typePlayerId), "error", true)
     end
 
     if typeRestoredStatuses ~= "table" then
-        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Received '%s', expected 'table'"):format(typeRestoredStatuses), "error", true)
+        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Expected 'table', Received '%s'"):format(typeRestoredStatuses), "error", true)
     end
 
     local self = setmetatable({
@@ -133,8 +142,8 @@ return function(playerId, restoredStatuses)
         statebag = Player(playerId).state
     }, PlayerStatus)
 
-    for statusName, configData in pairs(GlobalState.statuses or {}) do
-        self:registerStatus(statusName, restoredStatuses?[statusName] or configData.value)
+    for statusName, statusConfig in pairs(statuses) do
+        self:registerStatus(statusName, restoredStatuses?[statusName] or statusConfig.value)
     end
 
     return self

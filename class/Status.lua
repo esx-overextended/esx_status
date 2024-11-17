@@ -1,6 +1,6 @@
 ---@class Status
 ---@field name string
----@field value number
+---@field value number | string | boolean
 local Status = {}
 Status.__index = Status
 
@@ -17,21 +17,15 @@ function Status:getName()
     return self.name
 end
 
----@return number
+---@return number | string | boolean
 function Status:getValue()
     return self.value
 end
 
----@param value number
+---@param value number | string | boolean
 ---@return boolean
 function Status:setValue(value)
-    if type(value) ~= "number" then
-        ESX.Trace(("Status:setValue(%s) for %s error type!"):format(value, self.name), "error", true)
-
-        return false
-    end
-
-    if not utils.isValueValid(value) then
+    if not utils.isStatusValueValid(self.name, value) then
         if DEBUG then
             ESX.Trace(("Status:setValue(%s) for %s error value is not valid!"):format(value, self.name), "trace", true)
         end
@@ -45,18 +39,18 @@ function Status:setValue(value)
 end
 
 ---@param name string
----@param value number
+---@param value number | string | boolean
 ---@return Status?
 return function(name, value)
     local typeName = type(name)
     local typeValue = type(value)
 
     if typeName ~= "string" then
-        return ESX.Trace(("Invalid nam passed while creating an instance of Status class! Received '%s', expected 'string'"):format(typeName), "error", true)
+        return ESX.Trace(("Invalid name passed while creating an instance of Status class! Expected 'string', Received '%s'"):format(typeName), "error", true)
     end
 
-    if typeValue ~= "number" then
-        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Received '%s', expected 'number'"):format(typeValue), "error", true)
+    if typeValue ~= "number" and typeValue ~= "string" and typeValue ~= "boolean" then
+        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Expected 'number' or 'string' or 'boolean', Received '%s'"):format(typeValue), "error", true)
     end
 
     return setmetatable({
