@@ -1,8 +1,12 @@
 local utils = {}
-local statuses = require("shared.config").statuses
+local statuses = require("shared.config").statuses --[[@as table<string, StatusConfig>]]
 local toBoolean = { ["false"] = false, ["true"] = true, [0] = false, [1] = true }
 
 AddStateBagChangeHandler("statuses", "global", function(_, _, value)
+    if not value then return end
+
+    ---@cast value table<string, StatusConfig>
+
     statuses = value
 end)
 

@@ -12,10 +12,25 @@ end
 ----------------UNIT TESTS---------------
 -----------------------------------------
 
-local utils   = require("shared.utils")
-local config  = require("shared.config")
-local tracker = require("class.PlayerStatusRegistry")()
-local DEBUG   = config.debug
+local utils            = require("shared.utils")
+local config           = require("shared.config")
+local tracker          = require("class.PlayerStatusRegistry")()
+local DEBUG            = config.debug
+local intervalStatuses = {}
+
+AddStateBagChangeHandler("statuses", "global", function(_, _, value)
+    if not value then return end
+
+    ---@cast value table<string, StatusConfig>
+
+    config.statuses = value
+
+    for name, data in pairs(config.statuses) do
+        intervalStatuses[name] = type(data.update) == "number" and type(data.value) == "number" and data.update
+    end
+
+    ---@cast intervalStatuses table<string, number?>
+end)
 
 ---@param playerId number
 ---@param xPlayer table
@@ -74,12 +89,9 @@ AddEventHandler("onResourceStop", onResourceStop)
 AddEventHandler("onServerResourceStop", onResourceStop)
 
 ---Setup the status system for players that are already logged in (in case of resource restart)
-do
-    CreateThread(function()
-        GlobalState:set("statuses", config.statuses, true)
-    end)
 
-    Wait(1000) -- wait for global statebag to initializes
+CreateThread(function()
+    GlobalState:set("statuses", config.statuses, true)
 
     local xPlayers, count = ESX.GetExtendedPlayers()
 
@@ -88,7 +100,7 @@ do
 
         onPlayerLoaded(xPlayer.playerId, xPlayer)
     end
-end
+end)
 
 -----------------------------------------
 -----------------EXPORTS-----------------
@@ -96,29 +108,27 @@ end
 
 ---Generates an export to register a status in the system
 ---@param statusName string
----@param statusData table<string, any>
+---@param statusData StatusConfig
 ---@return boolean?
 function utils.api.registerGlobalStatus(statusName, statusData)
-    local registeredStatuses = GlobalState["statuses"]
-
-    if registeredStatuses[statusName] then
+    if config.statuses[statusName] then
         ESX.Trace(("exports:registerGlobalStatus(%s) error status already exist!"):format(statusName), "error", true)
 
         return false
     end
 
-    if type(statusName) ~= "string" or type(statusData) ~= "table" or type(statusData?.value) ~= "number" then
+    if type(statusName) ~= "string" or type(statusData) ~= "table" or type(statusData?.value) == "nil" then
         ESX.Trace(("exports:registerGlobalStatus(%s) error type!"):format(statusName), "error", true)
 
         return false
     end
 
-    registeredStatuses[statusName] = statusData
-    GlobalState:set("statuses", registeredStatuses)
+    config.statuses[statusName] = statusData
+    GlobalState:set("statuses", config.statuses, true)
 
     --Register the new status for already logged in players
-    for _, playerData in pairs(tracker:getAllPlayers()) do
-        playerData:registerStatus(statusName, statusData.value)
+    for _, player in pairs(tracker:getAllPlayers()) do
+        player:registerStatus(statusName, statusData.value)
     end
 
     if DEBUG then
@@ -132,20 +142,18 @@ end
 ---@param statusName string
 ---@return boolean?
 function utils.api.unregisterGlobalStatus(statusName)
-    local registeredStatuses = GlobalState["statuses"]
-
-    if not registeredStatuses[statusName] then
+    if not config.statuses[statusName] then
         ESX.Trace(("exports:unregisterGlobalStatus(%s) error status does not exist!"):format(statusName), "error", true)
 
         return false
     end
 
-    registeredStatuses[statusName] = nil
-    GlobalState:set("statuses", registeredStatuses)
+    config.statuses[statusName] = nil
+    GlobalState:set("statuses", config.statuses, true)
 
     --Unregister the status from already logged in players
-    for _, playerData in pairs(tracker:getAllPlayers()) do
-        playerData:unregisterStatus(statusName)
+    for _, player in pairs(tracker:getAllPlayers()) do
+        player:unregisterStatus(statusName)
     end
 
     if DEBUG then
@@ -222,12 +230,7 @@ CreateThread(function()
         Wait(config.updateInterval)
 
         local batchStart = 1
-        local validStatuses = {}
         local allPlayers, numOfPlayers = ESX.GetExtendedPlayers()
-
-        for name, data in pairs(GlobalState["statuses"]) do
-            validStatuses[name] = type(data.update) == "number" and data.update
-        end
 
         while batchStart <= numOfPlayers do
             local batchEnd = math.min(batchStart + BATCH_SIZE - 1, numOfPlayers)
@@ -243,7 +246,7 @@ CreateThread(function()
                 local playerStatuses = player:getAllStatus()
 
                 for statusName, statusValue in pairs(playerStatuses) do
-                    local updateAmount = validStatuses[statusName]
+                    local updateAmount = intervalStatuses[statusName]
 
                     if updateAmount then
                         if player:setStatus(statusName, statusValue + updateAmount) then

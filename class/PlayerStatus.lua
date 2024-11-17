@@ -10,8 +10,9 @@ setmetatable(PlayerStatus, {
     __metatable = false
 })
 
-local Status = require("class.Status")
-local DEBUG  = require("shared.config").debug
+local Status   = require("class.Status")
+local DEBUG    = require("shared.config").debug
+local statuses = require("shared.config").statuses --[[@as table<string, StatusConfig>]]
 
 ---@param name string
 ---@param value number | string | boolean
@@ -80,13 +81,13 @@ end
 
 ---@return table<string, number | string | boolean>
 function PlayerStatus:getAllStatus()
-    local statuses = {}
+    local playerStatuses = {}
 
     for statusName, statusData in pairs(self.statuses) do
-        statuses[statusName] = statusData:getValue()
+        playerStatuses[statusName] = statusData:getValue()
     end
 
-    return statuses
+    return playerStatuses
 end
 
 ---@param name string
@@ -112,6 +113,14 @@ function PlayerStatus:setStatus(name, value)
     return isSuccessful
 end
 
+AddStateBagChangeHandler("statuses", "global", function(_, _, value)
+    if not value then return end
+
+    ---@cast value table<string, StatusConfig>
+
+    statuses = value
+end)
+
 ---@param playerId number
 ---@param restoredStatuses table<string, number | string | boolean>
 ---@return PlayerStatus?
@@ -133,8 +142,8 @@ return function(playerId, restoredStatuses)
         statebag = Player(playerId).state
     }, PlayerStatus)
 
-    for statusName, configData in pairs(GlobalState.statuses or {}) do
-        self:registerStatus(statusName, restoredStatuses?[statusName] or configData.value)
+    for statusName, statusConfig in pairs(statuses) do
+        self:registerStatus(statusName, restoredStatuses?[statusName] or statusConfig.value)
     end
 
     return self

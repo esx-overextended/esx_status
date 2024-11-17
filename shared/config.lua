@@ -1,3 +1,9 @@
+---@class StatusConfig
+---@field value number | string | boolean
+---@field min? number
+---@field max? number
+---@field update? number
+
 return {
     debug = true,
     updateInterval = 30 * 1000,
