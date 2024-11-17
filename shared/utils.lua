@@ -1,6 +1,23 @@
 local utils = {}
 local statuses = require("shared.config").statuses --[[@as table<string, StatusConfig>]]
 local toBoolean = { ["false"] = false, ["true"] = true, [0] = false, [1] = true }
+local acceptedStringValues = {}
+
+local function refreshAcceptedStringValues()
+    table.wipe(acceptedStringValues)
+
+    for statusName, statusConfig in pairs(statuses) do
+        if statusConfig.acceptedValues then
+            acceptedStringValues[statusName] = {}
+
+            for i = 1, #statusConfig.acceptedValues do
+                acceptedStringValues[statusName][statusConfig.acceptedValues[i]] = true
+            end
+        end
+    end
+end
+
+do refreshAcceptedStringValues() end
 
 AddStateBagChangeHandler("statuses", "global", function(_, _, value)
     if not value then return end
@@ -8,6 +25,8 @@ AddStateBagChangeHandler("statuses", "global", function(_, _, value)
     ---@cast value table<string, StatusConfig>
 
     statuses = value
+
+    refreshAcceptedStringValues()
 end)
 
 ---@param value number | string
@@ -33,7 +52,10 @@ function utils.isStatusValueValid(name, value)
 
         return true
     elseif expectedType == "string" and receivedType == "string" then
-        --TODO strict string value based on an declared enum in config?
+        if status.acceptedValues then
+            return acceptedStringValues[name][value]
+        end
+
         return true
     elseif expectedType == "boolean" then
         if receivedType == "boolean" then
