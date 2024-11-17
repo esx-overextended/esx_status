@@ -113,6 +113,80 @@ function PlayerStatus:setStatus(name, value)
     return isSuccessful
 end
 
+---@param name string
+---@param value number
+---@return boolean
+function PlayerStatus:increaseStatus(name, value)
+    local status = self.statuses[name]
+
+    if not status then
+        if DEBUG then
+            ESX.Trace(("PlayerStatus:increaseStatus(%s) for player id %s error registry does not exist!"):format(name, self.playerId), "trace", true)
+        end
+
+        return false
+    end
+
+    local receivedType = type(value)
+    local expectedType = type(statuses[name]?.value)
+
+    if expectedType ~= "number" or receivedType ~= "number" then return false end
+
+    local potentialValueAfterUpdate = status:getValue() + value
+
+    if statuses[name].min and potentialValueAfterUpdate < statuses[name].min then
+        potentialValueAfterUpdate = statuses[name].min
+    elseif statuses[name].max and potentialValueAfterUpdate > statuses[name].max then
+        potentialValueAfterUpdate = statuses[name].max
+    end
+
+    ---@cast potentialValueAfterUpdate -?
+    local isSuccessful = status:setValue(potentialValueAfterUpdate)
+
+    if isSuccessful then
+        self.statebag:set(name, potentialValueAfterUpdate, true)
+    end
+
+    return isSuccessful
+end
+
+---@param name string
+---@param value number
+---@return boolean
+function PlayerStatus:decreaseStatus(name, value)
+    local status = self.statuses[name]
+
+    if not status then
+        if DEBUG then
+            ESX.Trace(("PlayerStatus:decreaseStatus(%s) for player id %s error registry does not exist!"):format(name, self.playerId), "trace", true)
+        end
+
+        return false
+    end
+
+    local receivedType = type(value)
+    local expectedType = type(statuses[name]?.value)
+
+    if expectedType ~= "number" or receivedType ~= "number" then return false end
+
+    local potentialValueAfterUpdate = status:getValue() - value
+
+    if statuses[name].min and potentialValueAfterUpdate < statuses[name].min then
+        potentialValueAfterUpdate = statuses[name].min
+    elseif statuses[name].max and potentialValueAfterUpdate > statuses[name].max then
+        potentialValueAfterUpdate = statuses[name].max
+    end
+
+    ---@cast potentialValueAfterUpdate -?
+    local isSuccessful = status:setValue(potentialValueAfterUpdate)
+
+    if isSuccessful then
+        self.statebag:set(name, potentialValueAfterUpdate, true)
+    end
+
+    return isSuccessful
+end
+
 AddStateBagChangeHandler("statuses", "global", function(_, _, value)
     if not value then return end
 

@@ -202,10 +202,8 @@ end
 ---@return boolean?
 function utils.api.increasePlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
-    local currentAmount = player and player:getStatus(status)
 
-    ---@diagnostic disable-next-line: need-check-nil
-    return currentAmount and player:setStatus(status, currentAmount + amount)
+    return player and player:increaseStatus(status, amount)
 end
 
 ---Generates an export to decrease the specified player's status value
@@ -215,10 +213,8 @@ end
 ---@return boolean?
 function utils.api.decreasePlayerStatus(playerId, status, amount)
     local player = tracker:getPlayer(playerId)
-    local currentAmount = player and player:getStatus(status)
 
-    ---@diagnostic disable-next-line: need-check-nil
-    return currentAmount and player:setStatus(status, currentAmount - amount)
+    return player and player:decreaseStatus(status, amount)
 end
 
 -----------------------------------------
@@ -247,11 +243,11 @@ CreateThread(function()
 
                 local playerStatuses = player:getAllStatus()
 
-                for statusName, statusValue in pairs(playerStatuses) do
+                for statusName in pairs(playerStatuses) do
                     local updateAmount = intervalStatuses[statusName]
 
                     if updateAmount then
-                        if player:setStatus(statusName, statusValue + updateAmount) then
+                        if player:increaseStatus(statusName, updateAmount) then
                             anyStatusChanged = true
                         end
                     end
