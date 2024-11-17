@@ -9,21 +9,9 @@
 return {
     debug = true,
     updateInterval = 30 * 1000,
+
+    ---@type table<string, StatusConfig>
     statuses = {
-        hunger = {
-            value = 100,
-            min = 0,
-            max = 100,
-            update = -0.45,
-            decimal = 2,
-        },
-        thirst = {
-            value = 100,
-            min = 0,
-            max = 100,
-            update = -0.6,
-            decimal = 2,
-        },
         -- growth = {
         --     value = "low",
         --     acceptedValues = {

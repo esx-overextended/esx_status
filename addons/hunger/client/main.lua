@@ -1,7 +1,5 @@
-local hunger
-local isThreadActive = false
-local threadInterval = 30 * 1000
-local decreaseHealthRange = { min = 5, max = 10 }
+local hunger, isThreadActive
+local config = require("addons.hunger.shared.config").config
 
 local function zeroHunger()
     if isThreadActive then return end
@@ -11,14 +9,13 @@ local function zeroHunger()
     CreateThread(function()
         while isThreadActive do
             if ESX.PlayerLoaded and not ESX.PlayerData.dead then
-                local playerPedId = PlayerPedId()
-                local currentHealth = GetEntityHealth(playerPedId)
-                local decreaseThreshold = math.random(decreaseHealthRange.min, decreaseHealthRange.max)
+                local currentHealth = GetEntityHealth(ESX.PlayerData.ped)
+                local decreaseThreshold = math.random(config.healthDecreaseRange.min, config.healthDecreaseRange.max)
 
-                SetEntityHealth(playerPedId, currentHealth - decreaseThreshold)
+                SetEntityHealth(ESX.PlayerData.ped, currentHealth - decreaseThreshold)
             end
 
-            Wait(threadInterval)
+            Wait(config.healthDegradeInterval)
         end
     end)
 end

@@ -18,6 +18,8 @@ local tracker          = require("class.PlayerStatusRegistry")()
 local DEBUG            = config.debug
 local intervalStatuses = {}
 
+GlobalState:set("statuses", config.statuses, true)
+
 AddStateBagChangeHandler("statuses", "global", function(_, _, value)
     if not value then return end
 
@@ -89,10 +91,7 @@ AddEventHandler("onResourceStop", onResourceStop)
 AddEventHandler("onServerResourceStop", onResourceStop)
 
 ---Setup the status system for players that are already logged in (in case of resource restart)
-
 CreateThread(function()
-    GlobalState:set("statuses", config.statuses, true)
-
     Wait(1000) -- wait for global statebag to initializes
 
     local xPlayers, count = ESX.GetExtendedPlayers()

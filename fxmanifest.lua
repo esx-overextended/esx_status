@@ -14,7 +14,7 @@ dependencies {
 shared_scripts {
     "@es_extended/imports.lua",
     "@ox_lib/init.lua",
-    "shared/*.lua",
+    "shared/*.lua"
 }
 
 server_scripts {
@@ -24,3 +24,8 @@ server_scripts {
 client_scripts {
     "client/*.lua",
 }
+
+-- addons
+shared_script "addons/**/shared/*.lua"
+server_script "addons/**/server/*.lua"
+client_script "addons/**/client/*.lua"
