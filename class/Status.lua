@@ -25,7 +25,9 @@ end
 ---@param value number | string | boolean
 ---@return boolean
 function Status:setValue(value)
-    if not utils.isStatusValueValid(self.name, value) then
+    local isValueValid, trimmedValue = utils.isStatusValueValid(self.name, value)
+
+    if not isValueValid then
         if DEBUG then
             ESX.Trace(("Status:setValue(%s) for %s error value is not valid!"):format(value, self.name), "trace", true)
         end
@@ -33,7 +35,9 @@ function Status:setValue(value)
         return false
     end
 
-    self.value = value
+    ---@cast trimmedValue -nil
+
+    self.value = trimmedValue
 
     return true
 end
@@ -46,15 +50,17 @@ return function(name, value)
     local typeValue = type(value)
 
     if typeName ~= "string" then
-        return ESX.Trace(("Invalid name passed while creating an instance of Status class! Expected 'string', Received '%s'"):format(typeName), "error", true)
+        return ESX.Trace(("Invalid name passed while creating an instance of Status class! Expected ^2'string'^7, Received ^1'%s'^7"):format(typeName), "error", true)
     end
 
     if typeValue ~= "number" and typeValue ~= "string" and typeValue ~= "boolean" then
-        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Expected 'number' or 'string' or 'boolean', Received '%s'"):format(typeValue), "error", true)
+        return ESX.Trace(("Invalid value passed while creating an instance of Status class! Expected ^2'number' or 'string' or 'boolean'^7, Received ^1'%s'^7"):format(typeValue), "error", true)
     end
 
-    return setmetatable({
+    local self = setmetatable({
         name = name,
         value = value
     }, Status)
+
+    return self:setValue(value) and self or nil
 end

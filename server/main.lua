@@ -43,7 +43,7 @@ local function onPlayerLoaded(playerId, xPlayer)
     end
 
     if DEBUG then
-        ESX.Trace(("Loading of playerId %s into the system was %s"):format(playerId, isSuccessful and "successful" or "unsuccessful"), "trace", true)
+        ESX.Trace(("Loading of playerId %s into the system was %s"):format(playerId, isSuccessful and "^2successful^7" or "^1unsuccessful^7"), "trace", true)
     end
 end
 
@@ -63,7 +63,7 @@ local function onPlayerDropped(playerId)
     end
 
     if DEBUG then
-        ESX.Trace(("Removing of playerId %s from the system was %s"):format(playerId, isSuccessful and "successful" or "unsuccessful"), "trace", true)
+        ESX.Trace(("Removing of playerId %s from the system was %s"):format(playerId, isSuccessful and "^2successful^7" or "^1unsuccessful^7"), "trace", true)
     end
 end
 

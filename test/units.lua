@@ -103,6 +103,15 @@ function UnitTests.TestStatusNumericTypeWithLimitsManipulation()
         assertEqual(status:getValue(), 75, "Status:getValue: Value remains unchanged after invalid type")
 end
 
+-- Test case: Validate manipulation of numeric status with strict decimal policy
+function UnitTests.TestStatusNumericTypeWithDecimalManipulation()
+    local Status = require("class.Status")
+    local status = Status("money", 0)
+
+    return assertEqual(status:setValue(500.123456789), true, "Status:setValue: Accept valid number for numeric type with strict decimal policy") and
+        assertEqual(status:getValue(), 500.12, "Status:getValue: Correct value after setting valid number for numeric type with strict decimal policy")
+end
+
 -- Test case: Validate manipulation of string type status, including type checks
 function UnitTests.TestStatusStringTypeManipulation()
     local Status = require("class.Status")
@@ -146,6 +155,12 @@ function UnitTests.TestStatusBooleanTypeManipulation()
         -- Valid boolean update
         assertEqual(status:setValue(true), true, "Status:setValue: Correct update to true") and
         assertEqual(status:getValue(), true, "Status:getValue: Correct value after setting true") and
+        -- Valid boolean update using 0 & 1 number
+        assertEqual(status:setValue(0), true, "Status:setValue: Correct update to false using number 0 as value") and
+        assertEqual(status:getValue(), false, "Status:getValue: Correct value after setting false using number 0 as value") and
+        -- Valid boolean update using "true" & "false" string
+        assertEqual(status:setValue("true"), true, "Status:setValue: Correct update to true using string 'true' as value") and
+        assertEqual(status:getValue(), true, "Status:getValue: Correct value after setting true using string 'true' as value") and
         -- Invalid type setting
         assertEqual(status:setValue("yes"), false, "Status:setValue: Reject non-boolean type (string)") and
         assertEqual(status:getValue(), true, "Status:getValue: Value remains unchanged after invalid type")
@@ -156,10 +171,10 @@ function UnitTests.TestPlayerStatusRegister()
     local PlayerStatus = require("class.PlayerStatus")
     local playerStatus = PlayerStatus(1, { health = 50, age = 30, money = 100, name = "Player1", hasPhone = true })
 
-    local success = playerStatus:registerStatus("energy", 60)
+    local success = playerStatus:registerStatus("growth", "low")
 
     return assertEqual(success, true, "PlayerStatus:registerStatus: Successfully register new status") and
-        assertEqual(playerStatus:getStatus("energy"), 60, "PlayerStatus:getStatus: Correct value for new status")
+        assertEqual(playerStatus:getStatus("growth"), "low", "PlayerStatus:getStatus: Correct value for new status")
 end
 
 -- Test case: Player status unregistration with existing and non-existing status
@@ -167,11 +182,11 @@ function UnitTests.TestPlayerStatusUnregister()
     local PlayerStatus = require("class.PlayerStatus")
     local playerStatus = PlayerStatus(1, { health = 50, age = 30, money = 100, name = "Player1", hasPhone = true })
 
-    playerStatus:registerStatus("energy", 60)
-    local success = playerStatus:unregisterStatus("energy")
+    playerStatus:registerStatus("growth", "low")
+    local success = playerStatus:unregisterStatus("growth")
 
     return assertEqual(success, true, "PlayerStatus:unregisterStatus: Successfully unregister existing status") and
-        assertEqual(playerStatus:unregisterStatus("energy"), false, "PlayerStatus:unregisterStatus: Fail to unregister non-existing status")
+        assertEqual(playerStatus:unregisterStatus("growth"), false, "PlayerStatus:unregisterStatus: Fail to unregister non-existing status")
 end
 
 -----------------------------------------
@@ -182,7 +197,7 @@ end
 return mutateESXTrace(function()
     local OGStatuses = require("shared.config").statuses
     require("shared.config").statuses = {                                        -- mock config for using in unit tests
-        money    = { value = 0 },                                                -- number type value with no min/max limit
+        money    = { value = 0, decimal = 2 },                                   -- number type value with no min/max limit
         age      = { value = 0, min = 0 },                                       -- number type value with no min limit
         health   = { value = 50, min = 0, max = 100 },                           -- number type value with min and max limit
         name     = { value = "none" },                                           -- string type value

@@ -32,7 +32,7 @@ function PlayerStatus:registerStatus(name, value)
     end
 
     if DEBUG then
-        ESX.Trace(("PlayerStatus:registerStatus(%s, %s) for player id %s was %s"):format(name, value, self.playerId, instance and "successful" or "unsuccessful"), "trace", true)
+        ESX.Trace(("PlayerStatus:registerStatus(%s, %s) for player id %s was %s"):format(name, value, self.playerId, instance and "^2successful^7" or "^1unsuccessful^7"), "trace", true)
     end
 
     return instance and true or false
@@ -129,11 +129,11 @@ return function(playerId, restoredStatuses)
     local typeRestoredStatuses = type(restoredStatuses)
 
     if typePlayerId ~= "number" then
-        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Expected 'number', Received '%s'"):format(typePlayerId), "error", true)
+        return ESX.Trace(("Invalid playerId passed while creating an instance of PlayerStatus class! Expected ^2'number'^7, Received ^1'%s'^7"):format(typePlayerId), "error", true)
     end
 
     if typeRestoredStatuses ~= "table" then
-        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Expected 'table', Received '%s'"):format(typeRestoredStatuses), "error", true)
+        return ESX.Trace(("Invalid restoredStatuses passed while creating an instance of PlayerStatus class! Expected ^2'table'^7, Received ^1'%s'^7"):format(typeRestoredStatuses), "error", true)
     end
 
     local self = setmetatable({

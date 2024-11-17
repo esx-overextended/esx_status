@@ -33,40 +33,53 @@ end)
 ---@param value number | string
 ---@return boolean?
 function utils.toBoolean(value)
-    local booleanValue = toBoolean[value]
-    return type(booleanValue) == "boolean" and booleanValue or nil
+    return toBoolean[value]
+end
+
+---@param number number
+---@param decimal number
+---@return number
+function utils.roundNumberToDecimal(number, decimal)
+    local multiplier = 10 ^ decimal
+    return math.floor(number * multiplier + 0.5) / multiplier
 end
 
 ---@param name string
 ---@param value number | string | boolean
----@return boolean
+---@return boolean, number | string | boolean | nil
 function utils.isStatusValueValid(name, value)
-    if not statuses[name] then return false end
+    if not statuses[name] then return false, nil end
 
     local status = statuses[name]
     local receivedType = type(value)
     local expectedType = type(status.value)
 
     if expectedType == "number" and receivedType == "number" then
-        if status.min and value < status.min then return false end
-        if status.max and value > status.max then return false end
+        if status.min and value < status.min then return false, nil end
+        if status.max and value > status.max then return false, nil end
 
-        return true
-    elseif expectedType == "string" and receivedType == "string" then
-        if status.acceptedValues then
-            return acceptedStringValues[name][value]
+        if status.decimal then
+            value = utils.roundNumberToDecimal(value, status.decimal)
         end
 
-        return true
+        return true, value
+    elseif expectedType == "string" and receivedType == "string" then
+        if status.acceptedValues then
+            return acceptedStringValues[name][value], value
+        end
+
+        return true, value
     elseif expectedType == "boolean" then
         if receivedType == "boolean" then
-            return true
+            return true, value
         elseif receivedType == "string" or receivedType == "number" then
-            return type(utils.toBoolean(value)) ~= "nil" and true
+            local convertedValue = utils.toBoolean(value)
+
+            return type(convertedValue) ~= "nil" and true, convertedValue
         end
     end
 
-    return false
+    return false, nil
 end
 
 utils.api = setmetatable({}, {

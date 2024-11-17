@@ -41,7 +41,7 @@ function PlayerStatusRegistry:addPlayer(playerId, restoredStatuses)
     end
 
     if DEBUG then
-        ESX.Trace(("PlayerStatusRegistry:addPlayer(%s) was %s"):format(playerId, instance and "successful" or "unsuccessful"), "trace", true)
+        ESX.Trace(("PlayerStatusRegistry:addPlayer(%s) was %s"):format(playerId, instance and "^2successful^7" or "^1unsuccessful^7"), "trace", true)
     end
 
     return instance and true or false

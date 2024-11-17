@@ -3,6 +3,7 @@
 ---@field min? number -- (optional) only works if value type is number
 ---@field max? number -- (optional) only works if value type is number
 ---@field update? number -- (optional) only works if value type is number
+---@field decimal? number -- (optional) only works if value type is number
 ---@field acceptedValues? string[] -- (optional) only works if value type is string
 
 return {
@@ -11,18 +12,20 @@ return {
     statuses = {
         hunger = {
             value = 100,
-            update = -0.45,
             min = 0,
-            max = 100
+            max = 100,
+            update = -0.45,
+            decimal = 2,
         },
         thirst = {
             value = 100,
-            update = -0.6,
             min = 0,
-            max = 100
+            max = 100,
+            update = -0.6,
+            decimal = 2,
         },
         -- growth = {
-        --     value = "",
+        --     value = "low",
         --     acceptedValues = {
         --         "low",
         --         "medium",
