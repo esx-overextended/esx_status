@@ -69,6 +69,10 @@ AddStateBagChangeHandler("stress", ("player:%s"):format(GetPlayerServerId(Player
 
     ESX.Trace(("Stress: %s"):format(stress), "trace", true)
 
+    if stress then
+        StatSetFloat("MP0_PLAYER_MENTAL_STATE", stress, false) -- update stat on pause menu
+    end
+
     if not stress or stress < config.minimumValueToStartEffect then
         isThreadActive = false
         return
