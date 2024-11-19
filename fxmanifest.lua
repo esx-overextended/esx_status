@@ -4,8 +4,8 @@ lua54 "yes"
 game "gta5"
 
 name "esx_status"
-version "0.0.0"
-description "ESX-Overextended Status"
+version "0.1.0"
+description "ESX-Overextended Status System"
 
 dependencies {
     "es_extended"

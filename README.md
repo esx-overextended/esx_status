@@ -1,13 +1,13 @@
-# esx_status (work in progress - not finished)
+# esx_status
 
 Cross-platform Exports
 ```lua
---Server
+-----------------------------------------
+-------------SERVER EXPORTS--------------
+-----------------------------------------
 
 ---@param statusName string
----@param statusData table<string, any>
----@return boolean?
----@param statusName string
+---@param statusData StatusConfig
 ---@return boolean?
 exports["esx_status"]:registerGlobalStatus(statusName, statusData)
 
@@ -17,16 +17,16 @@ exports["esx_status"]:unregisterGlobalStatus(statusName)
 
 ---@param playerId number
 ---@param status string
----@return number?
+---@return number | string | boolean | nil
 exports["esx_status"]:getPlayerStatus(playerId, status)
 
 ---@param playerId number
----@return table<string, number>?
+---@return table<string, number | string | boolean>?
 exports["esx_status"]:getAllPlayerStatus(playerId)
 
 ---@param playerId number
 ---@param status string
----@param amount number
+---@param value number | string | boolean
 ---@return boolean?
 exports["esx_status"]:setPlayerStatus(playerId, status, amount)
 
@@ -41,6 +41,19 @@ exports["esx_status"]:increasePlayerStatus(playerId, status, amount)
 ---@param amount number
 ---@return boolean?
 exports["esx_status"]:decreasePlayerStatus(playerId, status, amount)
+
+
+
+-----------------------------------------
+-------------CLIENT EXPORTS--------------
+-----------------------------------------
+
+---@param statusName string
+---@return StatusConfig?
+exports["esx_status"]:getGlobalStatus(statusName)
+
+---@return table<string, StatusConfig>
+exports["esx_status"]:getGlobalStatuses()
 ```
 
 <hr>
