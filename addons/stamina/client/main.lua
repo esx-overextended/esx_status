@@ -67,7 +67,7 @@ AddStateBagChangeHandler("stamina", ("player:%s"):format(GetPlayerServerId(playe
 
     SetSwimMultiplierForPlayer(playerId, multiplier)
     SetRunSprintMultiplierForPlayer(playerId, multiplier)
-    StatSetInt("MP0_STAMINA", stamina, true) -- update stat on pause menu
+    StatSetInt("MP0_STAMINA", stamina, false) -- update stat on pause menu
 
     staminaThread()
 end)
