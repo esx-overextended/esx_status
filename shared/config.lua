@@ -7,7 +7,7 @@
 ---@field acceptedValues? string[] -- (optional) only works if value type is string
 
 return {
-    debug = true,
+    debug = false,
     updateInterval = 30 * 1000,
 
     ---@type table<string, StatusConfig>
