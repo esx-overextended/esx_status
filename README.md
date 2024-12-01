@@ -1,6 +1,8 @@
-# esx_status
+# Server-Side Status System
 
-Cross-platform Exports
+- For a compatible in-game hud check out [x-hud's dev branch](https://github.com/XProject/x-hud/tree/dev)
+
+## Cross-platform Exports
 ```lua
 -----------------------------------------
 -------------SERVER EXPORTS--------------
