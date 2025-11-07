@@ -31,7 +31,7 @@ local function lungCapacityThread()
                                     boxShadow = "0 0 25px 10px rgba(0, 0, 0, 0.4)", -- Soft shadow on all 4 sides
                                     fontSize = "15px",                              -- General font size
                                     [".description"] = {
-                                        color = "#009dff",                          -- Golden yellow for description text
+                                        color = "#f1c40f",                          -- Golden yellow for description text
                                         fontWeight = "bold",                        -- Bold description for emphasis
                                         fontSize = "13px",                          -- Slightly smaller description text
                                     },

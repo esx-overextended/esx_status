@@ -11,7 +11,7 @@ local function staminaThread()
 
     CreateThread(function()
         while isThreadActive do
-            if IsPedRunning(PlayerPedId()) then
+            if IsPedRunning(ESX.PlayerData.ped) then
                 ESX.TriggerServerCallback("esx_status:updateStaminaOnRunning", function(isSuccessful)
                     if isSuccessful then
                         if config.showNotificationOnUpdate then

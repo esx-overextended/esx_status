@@ -11,12 +11,10 @@ local function strengthThread()
 
     CreateThread(function()
         while isThreadActive do
-            local playerPedId = PlayerPedId()
-
-            if IsPedInMeleeCombat(playerPedId) then
+            if IsPedInMeleeCombat(ESX.PlayerData.ped) then
                 local isTargetting, targetEntity = GetPlayerTargetEntity(playerId)
 
-                if isTargetting and not IsEntityDead(targetEntity) and GetMeleeTargetForPed(playerPedId) ~= 0 then
+                if isTargetting and not IsEntityDead(targetEntity) and GetMeleeTargetForPed(ESX.PlayerData.ped) ~= 0 then
                     ESX.TriggerServerCallback("esx_status:updateStrengthOnFighting", function(isSuccessful)
                         if isSuccessful then
                             if config.showNotificationOnUpdate then
