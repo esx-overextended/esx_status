@@ -62,7 +62,7 @@ AddStateBagChangeHandler("strength", ("player:%s"):format(GetPlayerServerId(play
 
     strength = value
 
-    ESX.Trace(("Strength: %s"):format(strength), "trace", true)
+    -- ESX.Trace(("Strength: %s"):format(strength), "trace", true)
 
     if not strength then
         isThreadActive = false

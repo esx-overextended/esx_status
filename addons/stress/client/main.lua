@@ -67,7 +67,7 @@ AddStateBagChangeHandler("stress", ("player:%s"):format(GetPlayerServerId(Player
 
     stress = value
 
-    ESX.Trace(("Stress: %s"):format(stress), "trace", true)
+    -- ESX.Trace(("Stress: %s"):format(stress), "trace", true)
 
     if stress then
         StatSetFloat("MP0_PLAYER_MENTAL_STATE", stress, false) -- update stat on pause menu

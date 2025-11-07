@@ -56,7 +56,7 @@ AddStateBagChangeHandler("stamina", ("player:%s"):format(GetPlayerServerId(playe
 
     stamina = value
 
-    ESX.Trace(("Stamina: %s"):format(stamina), "trace", true)
+    -- ESX.Trace(("Stamina: %s"):format(stamina), "trace", true)
 
     if not stamina then
         isThreadActive = false

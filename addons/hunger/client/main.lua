@@ -25,7 +25,7 @@ AddStateBagChangeHandler("hunger", ("player:%s"):format(GetPlayerServerId(Player
 
     hunger = value
 
-    ESX.Trace(("Hunger: %s"):format(hunger), "trace", true)
+    -- ESX.Trace(("Hunger: %s"):format(hunger), "trace", true)
 
     if not hunger or hunger > 0 then
         isThreadActive = false
