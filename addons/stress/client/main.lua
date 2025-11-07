@@ -10,7 +10,7 @@ local function getBlurLevel(stressValue)
         local level = config.blurLevels[i]
 
         if stressValue >= level.min and stressValue <= level.max then
-            blurLevel.timeout = level.timeout
+            blurLevel.timeout = level.timeout()
             blurLevel.intensity = level.intensity
             break
         end
@@ -73,7 +73,7 @@ AddStateBagChangeHandler("stress", ("player:%s"):format(GetPlayerServerId(Player
         StatSetFloat("MP0_PLAYER_MENTAL_STATE", stress, false) -- update stat on pause menu
     end
 
-    if not stress or stress < config.minimumValueToStartEffect then
+    if not stress or stress < config.blurLevels[1]?.min then
         isThreadActive = false
         return
     end
