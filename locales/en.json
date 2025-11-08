@@ -1,0 +1,31 @@
+{
+  "command_set_status": "Set a player's status to a specific amount",
+
+  "command_set_status_args_playerId": "The player ID",
+  "command_set_status_args_status": "The name of the status to modify",
+  "command_set_status_args_amount": "The amount to set the status to",
+
+  "command_set_status_error_invalid_status": "Status %s does not exist",
+  "command_set_status_error_failed": "Failed to set status %s for player ID %s",
+  "command_set_status_success": "Player ID %s had their status %s set to %s %s",
+  "command_set_status_success_by_admin": "by Admin %s (ID: %s)",
+  "command_set_status_success_by_console": "by console",
+
+  "gym_title": "Gym",
+  "gym_use": "Use",
+
+  "gym_exercise_button": "[E]",
+  "gym_exercise": "${gym_exercise_button} - %s",
+
+  "gym_workout_cancelled": "Workout cancelled!",
+  "gym_progress_busy": "You must wait until the current task/progress is finished...",
+  "gym_workout_zone_busy": "Someone else is busy exercising over there!",
+
+  "gym_effect_increase": "%s: +%s",
+  "gym_effect_decrease": "%s: -%s",
+  "gym_effect_hunger": "Hunger",
+  "gym_effect_thirst": "Thirst",
+  "gym_effect_stress": "Stress",
+  "gym_effect_stamina": "Stamina",
+  "gym_effect_strength": "Strength"
+}
