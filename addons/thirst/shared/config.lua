@@ -4,7 +4,7 @@ return {
         value = 100,
         min = 0,
         max = 100,
-        update = -0.6,
+        update = -1.05,
         decimal = 2,
     },
     config = {

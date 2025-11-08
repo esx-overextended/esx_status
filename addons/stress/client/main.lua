@@ -25,13 +25,22 @@ local function stressThread()
     isThreadActive = true
 
     CreateThread(function()
+        local transitionTime = 1000.00
+        local transitionMarginToIntensity = 100.00 -- we should increase this if players are remaining blurred in low levels for longer than expected
+
         while isThreadActive do
             if ESX.PlayerLoaded and not ESX.PlayerData.dead then
                 local blurLevel = getBlurLevel(stress)
 
-                TriggerScreenblurFadeIn(1000.0)
+                if blurLevel.intensity <= (transitionTime + transitionMarginToIntensity) then
+                    blurLevel.intensity = transitionTime + transitionMarginToIntensity
+                end
+
+                -- ESX.Trace(("Applying stress(%s) blur: intensity=%s, timeout=%s"):format(stress, blurLevel.intensity, blurLevel.timeout), "trace", true)
+
+                TriggerScreenblurFadeIn(transitionTime)
                 Wait(blurLevel.intensity)
-                TriggerScreenblurFadeOut(1000.0)
+                TriggerScreenblurFadeOut(transitionTime)
 
                 if stress >= 100 then
                     local fallRepeat = math.random(2, 4)
@@ -48,9 +57,9 @@ local function stressThread()
                         DoScreenFadeOut(200)
                         Wait(1000)
                         DoScreenFadeIn(200)
-                        TriggerScreenblurFadeIn(1000.0)
+                        TriggerScreenblurFadeIn(transitionTime)
                         Wait(blurLevel.intensity)
-                        TriggerScreenblurFadeOut(1000.0)
+                        TriggerScreenblurFadeOut(transitionTime)
                     end
                 end
 
