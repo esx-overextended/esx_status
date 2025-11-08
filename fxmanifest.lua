@@ -22,7 +22,11 @@ server_scripts {
 }
 
 client_scripts {
-    "client/*.lua",
+    "client/*.lua"
+}
+
+files {
+    "locales/*.json"
 }
 
 -- addons

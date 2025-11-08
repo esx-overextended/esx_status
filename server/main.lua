@@ -87,8 +87,28 @@ local function onResourceStop(resource)
     end
 end
 
+-- INFO
+-- DUE TO HOW THESE ARE SETUP, IN ORDER TO *RESTART* THE RESOURCE ON RUNTIME,
+-- DO NOT USE *ENSURE* OR *RESTART* COMMANDS TO RESTART THIS RESOURCE.
+-- FIRST THE RESOURCE NEEDS TO BE *STOPPED*, THEN IT SHOULD BE *STARTED* AGAIN.
+local messageOnRestart = {
+    "^1===================================================^7",
+    "  ^1IMPORTANT NOTICE:^7",
+    "  To restart this resource (" .. cache.resource .. "), first ^2*stop*^7 it,",
+    "  then ^2*start*^7 it again. ^1DO NOT^7 use the",
+    "  ^1'restart'^7 or ^1'ensure'^7 commands.",
+    "^1===================================================^7"
+}
 AddEventHandler("onResourceStop", onResourceStop)
-AddEventHandler("onServerResourceStop", onResourceStop)
+AddEventHandler("onServerResourceStop", function(resource)
+    if GetResourceState(resource):find("start") then
+        for i = 1, #messageOnRestart, 1 do
+            ESX.Trace(messageOnRestart[i], "warning", true)
+        end
+    end
+
+    onResourceStop(resource)
+end)
 
 ---Setup the status system for players that are already logged in (in case of resource restart)
 CreateThread(function()
@@ -266,3 +286,36 @@ CreateThread(function()
         end
     end
 end)
+
+ESX.RegisterCommand(config.command_set_status, "admin", function(xPlayer, args, showError)
+    local statuses = GlobalState["statuses"]
+
+    if not statuses or not statuses[args.status] then
+        return showError(locale("command_set_status_error_invalid_status", args.status))
+    end
+
+    local statusConfig = statuses[args.status]
+    local statusType   = type(statusConfig.value)
+
+    if statusType == "number" then
+        args.amount = tonumber(args.amount)
+    elseif statusType == "boolean" then
+        args.amount = utils.toBoolean(args.amount:lower())
+    end
+
+    local by = xPlayer and locale("command_set_status_success_by_admin", GetPlayerName(xPlayer.source), xPlayer.source) or locale("command_set_status_success_by_console")
+
+    if exports[cache.resource]:setPlayerStatus(args.playerId.source, args.status, args.amount) then
+        ESX.Trace(locale("command_set_status_success", args.playerId.source, args.status, args.amount, by), "info", true)
+    else
+        showError(locale("command_set_status_error_failed", args.status, args.playerId.source))
+    end
+end, true, {
+    help = locale("command_set_status"),
+    validate = true,
+    arguments = {
+        { name = "playerId", help = locale("command_set_status_args_playerId"), type = "player" },
+        { name = "status",   help = locale("command_set_status_args_status"),   type = "string" },
+        { name = "amount",   help = locale("command_set_status_args_amount"),   type = "string" }
+    }
+})

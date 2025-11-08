@@ -9,6 +9,7 @@
 return {
     debug = false,
     updateInterval = 30 * 1000,
+    command_set_status = "setstatus", -- type: string | string[]
 
     ---@type table<string, StatusConfig>
     statuses = {
