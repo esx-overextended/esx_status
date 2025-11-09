@@ -1,7 +1,8 @@
-local utils  = require("shared.utils")
-local config = require("shared.config")
+local utils     = require("shared.utils")
+local config    = require("shared.config")
+config.statuses = GlobalState["statuses"]
 
-local hud    = {}
+local hud       = {}
 
 ---@param statusName any
 ---@param inputStatusValue? any
@@ -34,7 +35,7 @@ local function sanitizeInputForHud(statusName, inputStatusValue)
     return true
 end
 
-local function handleHudForStatus(statusName)
+local function setupStatusHudHandler(statusName)
     if not sanitizeInputForHud(statusName) then return false end
 
     ---@cast statusName string
@@ -66,7 +67,7 @@ local function handleHudForStatus(statusName)
     return true
 end
 
-local function unhandleHudForStatus(statusName)
+local function removeStatusHudHandler(statusName)
     if type(statusName) ~= "string" then return end
 
     if hud[statusName] then
@@ -81,18 +82,18 @@ local function unhandleHudForStatus(statusName)
     end
 end
 
-local function ensureStatusHud()
+local function syncStatusHudHandlers()
     local newHud = {}
 
     for statusName in pairs(config.statuses) do
-        if handleHudForStatus(statusName) then
+        if setupStatusHudHandler(statusName) then
             newHud[statusName] = true
         end
     end
 
     for statusName in pairs(hud) do
         if not newHud[statusName] then
-            unhandleHudForStatus(statusName)
+            removeStatusHudHandler(statusName)
         end
     end
 
@@ -109,14 +110,10 @@ AddStateBagChangeHandler("statuses", "global", function(_, _, value)
 
     config.statuses = value
 
-    ensureStatusHud()
+    syncStatusHudHandlers()
 end)
 
-do
-    config.statuses = GlobalState["statuses"]
-
-    ensureStatusHud()
-end
+SetTimeout(1000, syncStatusHudHandlers)
 
 -----------------------------------------
 -----------------EXPORTS-----------------
