@@ -6,6 +6,11 @@ return {
         max = 100,
         update = -0.02,
         decimal = 2,
+        hud = {
+            iconName = "wind",
+            iconColor = "#ffffff",
+            progressColor = "#FFD700",
+        },
     },
     config = {
         updateInterval = 30 * 1000,
